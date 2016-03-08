@@ -7,20 +7,12 @@ var events = [
 
 var rels = [["N06BA04","TADH","all_years"],["N06BA09","TADH","all_years"],["N06BA12","TADH","all_years"]];
 
-/*
-var events = [
-    {short_name: "N06BA04", full_name: "N06BA04 Metilfenidato", type: "medicine", duration: "recurrent"}, 
-    {short_name: "TADH", full_name: "trastorno por déficit de atención e hiperactividad", type: "diagnosis", duration: "acute"}
-    ];
 
-var rels = [["N06BA04","TADH","all_years"]];
-*/
 
 
 var events_index = [];
 var var_list = [];
 var output = "";
-var output2 = "";
 
 
 
@@ -80,7 +72,7 @@ rels.forEach(function(relation){
     var a = events[events_index.indexOf(relation[0])];
     var b = events[events_index.indexOf(relation[1])];
     var c = relation[2];
-    console.log(a,b,c);
+    
 
     var m = ["nc","in","pr","pa","re"];
     var n = [["BEFORE","antes"],["SAMETIME","mismo día"],["AFTER","después"]];
@@ -115,7 +107,131 @@ rels.forEach(function(relation){
 
 });
 
-console.log(var_list);
-console.log(var_list.length)
 output+= "<div>Número de variables: "+var_list.length+"</div>"
 document.getElementById("output").innerHTML = output;
+
+
+
+
+$("#newEventBtn").click(function(e){
+    function newEventHtml(i) {
+        var r = '<div class="eventBifap">' + 
+        
+                    '<label>Nombre corto: </label>' + 
+                    '<input id="short_name'+i+'" type="text">'+
+                    
+                    '<label>Nombre completo: </label>'+
+                    '<input id="full_name'+i+'" type="text">'+
+                    
+                    '<label>Tipo de evento: </label>'+
+                    '<select id="type'+i+'">'+
+                        '<option value="medicine">Medicamento</option>'+
+                        '<option value="diagnosis">Diagnóstico</option>'+
+                    '</select>'+
+                    
+                    '<label>Duración de evento: </label>'+
+                    '<select id="duration'+i+'">'+
+                        '<option value="acute">Agudo</option>'+
+                        '<option value="chronic">Crónico</option>'+
+                        '<option value="recurrent">Recurrente</option>'+
+                    '</select>'+
+                    
+                    '<button id="eventRemoveBtn'+i+'">Eliminar</button>'
+                    
+                '</div>';
+            return r;
+    }
+    
+
+    
+    e.preventDefault();
+
+    i = $(".eventBifap").length
+    $("#eventFormList").append(newEventHtml(i));
+
+   
+    $("#eventRemoveBtn"+i).click(function(j){
+        j.preventDefault();
+        $(this).parent().remove();
+    });
+    
+    
+    
+    
+    
+    
+
+});
+
+$("#checkEvents").click(function(e){
+    e.preventDefault();
+    $("#relationFormList").empty();
+   
+   function newRelationHtml(i,j,ei,ej) {
+       var r = '<div class="relationBifap'+i+'">' + 
+                   '<input type="checkbox" checked id="relationCheck"'+i+'>'+
+                   '<label id="relationLabel'+i+'_'+j+'"><span class="e'+i+'">'+ei.short_name+'</span> combinado con <span class="e'+j+'">'+ej.short_name+'</span></label>'+
+                   '<select id="combtype'+i+'_'+j+'">'+
+                        '<option value="none">None</option>'+
+                        '<option value="last_year">Last Year</option>'+
+                        '<option value="all_years">All Years</option>'+
+                    '</select>'+
+               '</div>';
+       return r;
+   }
+   
+   function buildEventsArray() {
+       eventList = $("#eventFormList").children();
+       events = [];
+
+       $.each(eventList, function(i,e){
+           events.push({
+               short_name: document.getElementById("short_name"+i).value, 
+               full_name: document.getElementById("full_name"+i).value, 
+               type: document.getElementById("type"+i).value, 
+               duration: document.getElementById("duration"+i).value
+           });
+       });
+       return events;
+   }
+   
+   
+
+   
+   events = buildEventsArray();
+   
+   if (events.length > 1) {
+       i = 0;
+        while (events.length > 0) {
+            ei = events[0];
+            events.shift();
+            $.each(events,function(j,ej) {
+               console.log(ei, ej,i,j+i+1);
+               $("#relationFormList").append(newRelationHtml(i,j+i+1,ei,ej));
+            });
+            i++;
+        }
+    
+      /*
+      
+       $.each(events, function(i,ei){
+           events.shift();
+           $.each(events,function(j,ej){
+               console.log(i,j);
+               $("#relationFormList").append(newRelationHtml(i,j,events));
+           });
+           
+       });
+       */
+   }
+   
+   /*
+   if (events.slice(0,-1).length > 0) {
+       $.each(events.slice(0,-1), function(j,e){
+           $("#relationFormList").append(newRelationHtml(i,j));
+       });
+   }
+   */
+   
+});
+

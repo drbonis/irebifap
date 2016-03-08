@@ -4,29 +4,25 @@
        <style>
            .body {width: 90%;}
        </style>
+       <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+       <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
     </head>
     <body>
         <h3>Variables a calcular</h3>
         <div id="formulario">
             <form>
-                <div id="evento_01_div">
-                    <label>Nombre corto: </label><input id="evento_01" type="text">
-                    <label>Nombre completo: </label><input id="evento_01" type="text">
-                    <label>Tipo de evento: </label>
-                    <select name="type_01">
-                        <option value="medicine">Medicamento</option>
-                        <option value="diagnosis">Diagnóstico</option>
-                    </select>
-                    <label>Duración de evento: </label>
-                        <select name="duration_01">
-                            <option value="acute">Agudo</option>
-                            <option value="chronic">Crónico</option>
-                            <option value="recurrent">Recurrente</option>
-                        </select>
-                    
-                </div>
+                <div id="eventFormList">
 
-                
+                </div>
+                <button id="newEventBtn">Nuevo evento</button>
+                <button id="checkEvents">Check events</button>
+            </form>
+        </div>
+        <div id="relaciones">
+            <form>
+               <div id="relationFormList">
+
+               </div> 
             </form>
         </div>
         <div id="output"></div>
