@@ -10,10 +10,16 @@ var rels = [["N06BA04","TADH","last_years"],["N06BA09","TADH","last_years"],["N0
 */
 //var rels = [];
 
+
+
+
 var events = [
     {short_name: "AAAAAA", full_name: "aaaaaaaaaaaaa", type: "medicine", duration: "recurrent"}, 
     {short_name: "BBBBBB", full_name: "bbbbbbbbbbbbb", type: "diagnosis", duration: "recurrent"},
+    {short_name: "CCCCCC", full_name: "ccccccccccccc", type: "medicine", duration: "recurrent"}
     ];
+
+var groups = [{short_name: "AAABBB", full_name: "abababababab", type: "group", events: ["AAAAAA","BBBBBB"]}];
 
 var rels = [["AAAAAA","BBBBBB","all_years"]];
 
@@ -60,7 +66,20 @@ events.forEach(function(entry,index) {
         events[index].re = "con al menos "+str_type+ " de "+ entry.full_name +" anterior al 01/01/(20XX-1) y sin "+str_type+ " de "+ entry.full_name +" entre el 01/01/(20XX-1) - 31/12/(20XX-1) y con al menos "+str_type+ " de "+ entry.full_name +" entre el 01/01/20XX y el 31/12/20XX";
         events[index].pa = "con al menos "+str_type+ " de "+ entry.full_name +" anterior al 01/01/20XX y sin "+str_type+ " de "+ entry.full_name +" entre el 01/01/20XX y el 31/12/20XX";
     }
-    
+});
+
+
+groups.forEach(function(group, index){
+    console.log(group.short_name);
+    events_index.push(group.short_name);
+    group.events.forEach(function(eventGroup,index){
+        console.log(eventGroup);
+    });
+}); 
+
+
+
+events.forEach(function(entry,index) {
     //code for listing variables for individual events
     output += "<div><strong>" + entry.short_name + "_NC (Nunca han sido casos de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.nc+"</div>";
     var_list.push(entry.short_name + "_NC");
@@ -173,6 +192,9 @@ document.getElementById("output").innerHTML = output;
 
 
 
+
+/* block of jquery elements */
+
 $("#newEventBtn").click(function(e){
     function newEventHtml(i) {
         var r = '<div class="eventBifap">' + 
@@ -271,27 +293,9 @@ $("#checkEvents").click(function(e){
             });
             i++;
         }
-    
-      /*
-      
-       $.each(events, function(i,ei){
-           events.shift();
-           $.each(events,function(j,ej){
-               console.log(i,j);
-               $("#relationFormList").append(newRelationHtml(i,j,events));
-           });
-           
-       });
-       */
+
    }
-   
-   /*
-   if (events.slice(0,-1).length > 0) {
-       $.each(events.slice(0,-1), function(j,e){
-           $("#relationFormList").append(newRelationHtml(i,j));
-       });
-   }
-   */
+
    
 });
 
