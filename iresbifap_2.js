@@ -14,14 +14,14 @@ var rels = [["N06BA04","TADH","last_years"],["N06BA09","TADH","last_years"],["N0
 
 
 var events = [
-    {short_name: "AAAAAA", full_name: "aaaaaaaaaaaaa", type: "medicine", duration: "recurrent"}, 
-    {short_name: "BBBBBB", full_name: "bbbbbbbbbbbbb", type: "diagnosis", duration: "recurrent"},
-    {short_name: "CCCCCC", full_name: "ccccccccccccc", type: "medicine", duration: "recurrent"}
+    {short_name: "AAAAAA", full_name: "aaaaaaaaaaaaa", type: "medicine"}, 
+    {short_name: "BBBBBB", full_name: "bbbbbbbbbbbbb", type: "diagnosis"},
+    {short_name: "CCCCCC", full_name: "ccccccccccccc", type: "medicine"}
     ];
 
 var groups = [{short_name: "AAABBB", full_name: "abababababab", type: "group", events: ["AAAAAA","BBBBBB"]}];
 
-var rels = [["AAAAAA","BBBBBB","all_years"]];
+var rels = [["AAAAAA","BBBBBB"],["AAAAAA","CCCCCC"]];
 
 var events_index = [];
 var var_list = [];
@@ -34,33 +34,36 @@ events.forEach(function(entry,index) {
     
     //code for creating index
     events_index.push(entry['short_name']);
-
-
-    // code for creating texts  
-    var str_type = (entry['type']==='medicine')? 'una receta' : 'un diagnostico';
     
+    var cu = "con al menos un día de " + entry.full_name + " entre el 01/01/20XX - 31/12/20XX";
+    var pa = "con al menos un día de " + entry.full_name + " anterior al 01/01/20XX";
     //current year present
-    events[index].cp = "con al menos "+ str_type + " de " + entry.full_name + " entre el 01/01/20XX - 31/12/20XX";
-    //current year absent
-    events[index].ca = "sin "+str_type+ " de "+ entry.full_name +" entre el 01/01/20XX y el 31/12/20XX";
+    events[index].cu = cu;
     //previous year present
-    events[index].pp = "con al menos "+ str_type + " de " + entry.full_name + " entre el 01/01/20XX-1 - 31/12/20XX-1";
-    //previous year absent
-    events[index].pa = "sin "+str_type+ " de "+ entry.full_name +" entre el 01/01/20XX-1 y el 31/12/20XX-1";
-    //before previous year present
-    events[index].pp = "con al menos "+ str_type + " de " + entry.full_name + " antes del 01/01/20XX-1";
-    //before previous year absent
-    events[index].pp = "sin "+ str_type + " de " + entry.full_name + " antes del 01/01/20XX-1";
+    events[index].pa = pa;
+    events[index].cupa = "( " + cu + " ) y ( " + pa + " ) ";
+    
+
+    
 
 });
 
 
 groups.forEach(function(group, index){
-    console.log(group.short_name);
+    console.log("Nuevo evento combinado: "+group.short_name);
     events_index.push(group.short_name);
+    var cu="";
+    var pa= "";
     group.events.forEach(function(eventGroup,index){
-        console.log(eventGroup);
+        //console.log(eventGroup);
+        cu += "con al menos un día de "+eventGroup+" entre el 01/01/20XX - 31/12/20XX ";
+        pa += "con al menos un día de "+eventGroup+" anterior al 01/01/20XX ";
+        if(index < group.events.length - 1) { cu+=" OR "; pa+= " OR "}
     });
+    var cupa = "( " + cu + " ) y ( " + pa + " )";
+    events.push({short_name: group.short_name, full_name: group.full_name, type: group.type, events: group.events, cu: cu, pa: pa, cupa: cupa});
+    console.log("Número de pacientes" + cu);
+    console.log("Número de pacientes" + pa);
 }); 
 
 
@@ -68,25 +71,15 @@ groups.forEach(function(group, index){
 events.forEach(function(entry,index) {
     //code for listing variables for individual events
     
-    output += "<div><strong>" + entry.short_name + "_CP (Casos en el año actual de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.cp+"</div>";
-    var_list.push(entry.short_name + "_CP");
+    output += "<div><strong>" + entry.short_name + "_CU (Casos en el año actual de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.cu+"</div>";
+    var_list.push(entry.short_name + "_CU");
     
-    output += "<div><strong>" + entry.short_name + "_CA (No son casos en el año actual de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.ca+"</div>";
+    output += "<div><strong>" + entry.short_name + "_PA (Casos pasados de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.pa+"</div>";
     var_list.push(entry.short_name + "_CA");
     
-    output += "<div><strong>" + entry.short_name + "_PP (Casos incidentes de " + entry.full_name + " )</strong> = Número de pacientes "+entry.in+"</div>";
-    var_list.push(entry.short_name + "_IN");
-    
-    output += "<div><strong>" + entry['short_name'] + "_PA (Casos prevalentes de " + entry.full_name + ")</strong> =  Numero de pacientes "+entry.pr+"</div>";
-    var_list.push(entry.short_name + "_PR");
-    
-    output += "<div><strong>" + entry.short_name + "_BP (Casos incidentes de " + entry.full_name + " )</strong> = Número de pacientes "+entry.in+"</div>";
-    var_list.push(entry.short_name + "_IN");
-    
-    output += "<div><strong>" + entry['short_name'] + "_BA (Casos prevalentes de " + entry.full_name + ")</strong> =  Numero de pacientes "+entry.pr+"</div>";
-    var_list.push(entry.short_name + "_PR");
-    
-  
+    output += "<div><strong>" + entry.short_name + "_CUPA (Casos en el año actual y también en el pasado de  " + entry.full_name + " )</strong> = Número de pacientes "+entry.cupa+"</div>";
+    var_list.push(entry.short_name + "_CUPA");
+
 
     output += "<div>............</div>";
     
@@ -96,74 +89,12 @@ events.forEach(function(entry,index) {
 
 rels.forEach(function(relation){
 
-    function getCaseDescription(caseDesc) {
-        switch (caseDesc) {
-            case "nc":
-                return "No Casos";
-                break;
-            case "in":
-                return "Casos Incidentes";
-                break;
-            case "pr":
-                return "Casos Prevalentes";
-                break;
-            case "pa":
-                return "Casos Pasados";
-                break;
-            case "re":
-                return "Casos Reiniciados";
-                break;
-            case "cp":
-                return "Casos en el año actual";
-                break;
-            case "ca":
-                return "No casos en el año actual";
-                break;
-            default:
-                return null;
-        }
-        
-    }
-
     var a = events[events_index.indexOf(relation[0])];
     var b = events[events_index.indexOf(relation[1])];
-    var c = relation[2];
     
+    console.log("Número de pacientes con al menos un día de "+a.full_name+" entre el 01/01/20XX - 31/12/20XX y al menos un día de "+b.full_name+" entre el 01/01/20XX - 31/12/20XX");
+    console.log("Número de pacientes con al menos un día en el que exista un curso de "+a.full_name+" y un curso de "+b.full_name+" simultáneamente");
 
-    var m = ["nc","in","pr","pa","re","cp","ca"];
-    var n = [["BEFORE","antes"],["SAMETIME","mismo día"],["AFTER","después"]];
-    
-    
-    
-    m.forEach(function(e,i){
-        
-        if(!((a.duration==='chronic' && e == "pa") ||(e=='re' && (a.duration != 'recurrent')) )) {   //dont calculate PAxx if chronic nor RExx if recurrent nor CAxx
-        
-            m.forEach(function(f,j){
-                if(!((b.duration==='chronic' && f == "pa")||  (f=='re' && (b.duration != 'recurrent')))) { // dont calculate xxPA if chronic nor xxRE if recurrent nor xxCA
-                    output+="<div><strong>"+e.toUpperCase()+f.toUpperCase()+"_"+a['short_name']+"_"+b['short_name']+" ("+getCaseDescription(e)+" de "+a['short_name']+" que son "+getCaseDescription(f)+" de "+b['short_name']+")</strong> = Número de pacientes "+a[e]+" y "+b[f]+"</div>";
-                    var_list.push(e.toUpperCase()+f.toUpperCase()+"_"+a['short_name']+"_"+b['short_name']);
-                    
-                    //if(c != 'none' && (e == f && (e == 'in' || e == 'pr')) || (c == 'all_years' && (e != 'in' && f != 'in' && e != 'nc' && f != 'nc'))) {
-                    if(c != 'none'  && e != 'nc' && f!= 'nc' && !(e == 'in' && f!='in') && !(f == 'in' && e!='in') && !(e == 'cp' && f!='cp') && !(f == 'cp' && e!='cp')) {
-                        // calculate before, sametime and after variables
-                        var str1 = (a.type==='medicine')? "de la primera receta de "+a.full_name:"del primer diagnóstico de "+a.full_name;
-                        var str2 = (b.type==='medicine')? "de la primera receta de "+b.full_name:"del primer diagnóstico de "+b.full_name;
-                        n.forEach(function(o,k){
-                            output += "<div style=\"color: red\"><strong>"+e.toUpperCase()+f.toUpperCase()+"_"+a['short_name']+"_"+o[0]+"_"+b['short_name']+"("+getCaseDescription(e)+" de "+a['short_name']+" que son "+getCaseDescription(f)+" de "+b['short_name']+" donde "+a['short_name']+" ocurre "+o[1]+" que "+b['short_name']+")</strong> = Número de pacientes "+a.in+" y "+b.in+" y en los que "+str1+" ocurre "+o[1]+" "+str2+"</div>";
-                            var_list.push(e.toUpperCase()+f.toUpperCase()+"_"+a['short_name']+"_"+o[0]+"_"+b['short_name']);
-                            
-                        }); 
-                        
-
-                    } 
-                    
-                }
-                
-            }); 
-        }
-        output += "<div>............</div>";
-    });
 
 });
 
