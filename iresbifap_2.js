@@ -10,6 +10,204 @@ var rels = [["N06BA04","TADH","last_years"],["N06BA09","TADH","last_years"],["N0
 */
 //var rels = [];
 
+function Irebifap (events, groups, rels) {
+    var self = this;
+    
+    this.events = events;
+    this.groups = groups;
+    this.rels = rels;
+    this.tables = [];
+    this.events_index = [];
+    this.var_list = [];
+    this.output = "";
+    
+    this.age_groups = [
+        {min: 0, max: 0, capt: "<1 año"},
+        {min: 1, max: 1, capt: "1 a <2 años"},
+        {min: 2, max: 3, capt: "2 a <4 años"},
+        {min: 4, max: 4, capt: "4 a <5 años"},
+        {min: 5, max: 5, capt: "5 a <6 años"},
+        {min: 6, max: 7, capt: "6 a <8 años"},
+        {min: 8, max: 9, capt: "8 a <10 años"},
+        {min: 10, max: 11, capt: "10 a <12 años"},
+        {min: 12, max: 13, capt: "12 a <14 años"},
+        {min: 14, max: 14, capt: "14 a <15 años"},
+        {min: 15, max: 15, capt: "15 a <16 años"},
+        {min: 16, max: 17, capt: "16 a <18 años"},
+        {min: 18, max: 19, capt: "18 a <20 años"},
+        {min: 20, max: 24, capt: "20 a <15 años"},
+        {min: 25, max: 29, capt: "25 a <30 años"},
+        {min: 30, max: 34, capt: "30 a <35 años"},
+        {min: 35, max: 39, capt: "35 a <40 años"},
+        {min: 40, max: 44, capt: "40 a <45 años"},
+        {min: 45, max: 49, capt: "45 a <50 años"},
+        {min: 50, max: 54, capt: "50 a <55 años"},
+        {min: 55, max: 59, capt: "55 a <59 años"},
+        {min: 60, max: 64, capt: "60 a <65 años"},
+        {min: 65, max: 69, capt: "65 a <70 años"},
+        {min: 70, max: 74, capt: "70 a <75 años"},
+        {min: 75, max: 79, capt: "75 a <79 años"},
+        {min: 80, max: 84, capt: "80 a <85 años"},
+        {min: 85, max: 89, capt: "85 a <90 años"},
+        {min: 90, max: 94, capt: "90 a <95 años"},
+        {min: 95, max: 99, capt: "95 a <100 años"},
+        {min: 100, max: 104, capt: "100 a <105 años"},
+        {min: 105, max: 109, capt: "105 a <110 años"}
+        ];
+        
+    this.sex = [{c: "Hombre", v: 0}, {c: "Mujer", v: 1}];
+    
+    /*[0,0];[1,1];[2,3];[4,4];[5,5];[6,7];[8,9];[10,11];[12,13];[14,14];[15,15];[16,17];[18,19];
+                      [20,24];[25,29];[30,34];[35,39];[40,44];[45,49];[50,54];[55,59];
+                      [60,64];[65,69];[70,74];[75,79];[80,84];[85,89];[90,94];[95,99];[100,104];[105,109].*/
+                      
+
+    // generates the events
+    this.events.forEach(function(entry,index) {
+        
+        entry.events = []; // empty array of events if not a group
+        entry.rels = {};
+        
+        //code for creating index
+        self.events_index.push(entry.short_name);
+        self.events[index] = entry;
+        
+        
+        var cu = "con al menos un día de " + entry.full_name + " entre el 01/01/20XX - 31/12/20XX";
+        var pa = "con al menos un día de " + entry.full_name + " anterior al 01/01/20XX";
+        //current year present
+        self.events[index].cu = cu;
+        //previous year present
+        self.events[index].pa = pa;
+        //current and previous year present
+        self.events[index].cupa = "( " + cu + " ) y ( " + pa + " ) ";
+        
+    });
+    
+    //each group of events is added as new event
+    this.groups.forEach(function(group, index){
+        console.log("Nuevo evento combinado: "+group.short_name);
+        self.events_index.push(group.short_name);
+        var cu="";
+        var pa= "";
+        group.events.forEach(function(eventGroup,index){
+            //console.log(eventGroup);
+            cu += "con al menos un día de "+eventGroup+" entre el 01/01/20XX - 31/12/20XX ";
+            pa += "con al menos un día de "+eventGroup+" anterior al 01/01/20XX ";
+            if(index < group.events.length - 1) { cu+=" OR "; pa+= " OR "}
+        });
+        var cupa = "( " + cu + " ) y ( " + pa + " )";
+        self.events.push({short_name: group.short_name, full_name: group.full_name, type: group.type, events: group.events, cu: cu, pa: pa, cupa: cupa, rels: []});
+
+    }); 
+    
+    //code for variables of event's interaction
+    
+    this.rels.forEach(function(relation){
+    
+        var a = self.events[self.events_index.indexOf(relation[0])];
+        var b = self.events[self.events_index.indexOf(relation[1])];
+        
+        console.log(a);
+        console.log(b);
+        a.rels[b.short_name] ={event: b.short_name, cu: "con al menos un día de "+a.full_name+" entre el 01/01/20XX - 31/12/20XX y al menos un día de "+b.full_name+" entre el 01/01/20XX - 31/12/20XX", ev: "con al menos un día en el que exista un curso de "+a.full_name+" y un curso de "+b.full_name+" simultáneamente"  };
+        
+    
+    
+    });
+    
+    this.buildTables = function () {
+        // tablas sobre eventos individuales (o grupos)
+        self.events.forEach(function(event,index){
+                // tabla presencia en último año por edad y sexo
+                var t1 = {
+                    short_name: event.short_name+"_20XX",
+                    title: "Pacientes con "+event.full_name+" en 20XX",
+                    vars: [event.cu],
+                    cells: [
+                        ["","Pacientes con "+event.full_name+" en 2014","","",""],
+                        ["","","Hombres","Mujeres","Ambos"]
+                    ]
+
+                }
+                self.age_groups.forEach(function(a){
+                    t1.cells.push([a.capt,event.full_name,"","",""]);
+                    event.events.forEach(function(e){
+                        var full_event = self.events[self.events_index.indexOf(e)];
+                        t1.cells.push(["",full_event.full_name,"","",""]);
+                    });
+                });
+                self.tables.push(t1); 
+
+                // tabla presencia en último año global
+                var t2 = {
+                    short_name: event.short_name+"_2014",
+                    title: "Pacientes con "+event.full_name+" en 20XX",
+                    vars: [event.cu],
+                    cells: [
+                        ["Pacientes con "+event.full_name+" en 20XX","","",""],
+                        ["","Hombres","Mujeres","Ambos"]
+                    ]
+                
+                }
+                t2.cells.push([event.full_name,"","",""]);
+                event.events.forEach(function(e){
+                    var full_event = self.events[self.events_index.indexOf(e)];
+                    t2.cells.push([full_event.full_name,"","",""]);
+                });
+
+                self.tables.push(t2); 
+        });
+        
+        // tablas sobre relaciones entre eventos
+        
+        self.rels.forEach(function(rel){
+            
+            var a = self.events[self.events_index.indexOf(rel[0])];
+            var b = self.events[self.events_index.indexOf(rel[1])];
+            
+            
+            // tabla de contingencia
+            var t = {
+               short_name: a.short_name+"_"+b.short_name+"_2014",
+               title: "Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX",
+               vars: [a.cu, b.cu, a.rels[b.short_name]['cu']],
+               cells: [
+                   ["Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX","","",""],
+                   ["","Con "+a.short_name,"Sin"+a.short_name,"Total"],
+                   ["Con "+b.short_name,"","",""],
+                   ["Sin "+b.short_name,"","",""],
+                   ["Total"+"","","",""]
+               ]
+           
+            }
+            self.tables.push(t);
+        });
+        
+    }
+    
+    this.buildOutput = function () {
+        self.events.forEach(function(entry,index) {
+            //code for listing variables for individual events
+            
+            self.output += "<div><strong>" + entry.short_name + "_CU (Casos en el año actual de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.cu+"</div>";
+            self.var_list.push(entry.short_name + "_CU");
+            
+            self.output += "<div><strong>" + entry.short_name + "_PA (Casos pasados de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.pa+"</div>";
+            self.var_list.push(entry.short_name + "_CA");
+            
+            self.output += "<div><strong>" + entry.short_name + "_CUPA (Casos en el año actual y también en el pasado de  " + entry.full_name + " )</strong> = Número de pacientes "+entry.cupa+"</div>";
+            self.var_list.push(entry.short_name + "_CUPA");
+        
+        
+            self.output += "<div>............</div>";
+            
+            
+        });
+    }
+    
+}
+
 
 
 
@@ -23,83 +221,15 @@ var groups = [{short_name: "AAABBB", full_name: "abababababab", type: "group", e
 
 var rels = [["AAAAAA","BBBBBB"],["AAAAAA","CCCCCC"]];
 
-var events_index = [];
-var var_list = [];
-var output = "";
 
 
+var newIre = new Irebifap(events, groups, rels);
+newIre.buildOutput();
+newIre.buildTables();
+console.log(newIre);
 
 
-events.forEach(function(entry,index) {
-    
-    //code for creating index
-    events_index.push(entry['short_name']);
-    
-    var cu = "con al menos un día de " + entry.full_name + " entre el 01/01/20XX - 31/12/20XX";
-    var pa = "con al menos un día de " + entry.full_name + " anterior al 01/01/20XX";
-    //current year present
-    events[index].cu = cu;
-    //previous year present
-    events[index].pa = pa;
-    events[index].cupa = "( " + cu + " ) y ( " + pa + " ) ";
-    
-
-    
-
-});
-
-
-groups.forEach(function(group, index){
-    console.log("Nuevo evento combinado: "+group.short_name);
-    events_index.push(group.short_name);
-    var cu="";
-    var pa= "";
-    group.events.forEach(function(eventGroup,index){
-        //console.log(eventGroup);
-        cu += "con al menos un día de "+eventGroup+" entre el 01/01/20XX - 31/12/20XX ";
-        pa += "con al menos un día de "+eventGroup+" anterior al 01/01/20XX ";
-        if(index < group.events.length - 1) { cu+=" OR "; pa+= " OR "}
-    });
-    var cupa = "( " + cu + " ) y ( " + pa + " )";
-    events.push({short_name: group.short_name, full_name: group.full_name, type: group.type, events: group.events, cu: cu, pa: pa, cupa: cupa});
-    console.log("Número de pacientes" + cu);
-    console.log("Número de pacientes" + pa);
-}); 
-
-
-
-events.forEach(function(entry,index) {
-    //code for listing variables for individual events
-    
-    output += "<div><strong>" + entry.short_name + "_CU (Casos en el año actual de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.cu+"</div>";
-    var_list.push(entry.short_name + "_CU");
-    
-    output += "<div><strong>" + entry.short_name + "_PA (Casos pasados de " + entry.full_name + " )</strong> = Numero de pacientes "+entry.pa+"</div>";
-    var_list.push(entry.short_name + "_CA");
-    
-    output += "<div><strong>" + entry.short_name + "_CUPA (Casos en el año actual y también en el pasado de  " + entry.full_name + " )</strong> = Número de pacientes "+entry.cupa+"</div>";
-    var_list.push(entry.short_name + "_CUPA");
-
-
-    output += "<div>............</div>";
-    
-});
-
-//code for variables of event's interaction
-
-rels.forEach(function(relation){
-
-    var a = events[events_index.indexOf(relation[0])];
-    var b = events[events_index.indexOf(relation[1])];
-    
-    console.log("Número de pacientes con al menos un día de "+a.full_name+" entre el 01/01/20XX - 31/12/20XX y al menos un día de "+b.full_name+" entre el 01/01/20XX - 31/12/20XX");
-    console.log("Número de pacientes con al menos un día en el que exista un curso de "+a.full_name+" y un curso de "+b.full_name+" simultáneamente");
-
-
-});
-
-output+= "<div>Número de variables: "+var_list.length+"</div>"
-document.getElementById("output").innerHTML = output;
+//document.getElementById("output").innerHTML = output;
 
 
 
