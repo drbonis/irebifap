@@ -22,36 +22,36 @@ function Irebifap (events, groups, rels) {
     this.output = "";
     
     this.age_groups = [
-        {min: 0, max: 0, capt: "<1 año"},
-        {min: 1, max: 1, capt: "1 a <2 años"},
-        {min: 2, max: 3, capt: "2 a <4 años"},
-        {min: 4, max: 4, capt: "4 a <5 años"},
-        {min: 5, max: 5, capt: "5 a <6 años"},
-        {min: 6, max: 7, capt: "6 a <8 años"},
-        {min: 8, max: 9, capt: "8 a <10 años"},
-        {min: 10, max: 11, capt: "10 a <12 años"},
-        {min: 12, max: 13, capt: "12 a <14 años"},
-        {min: 14, max: 14, capt: "14 a <15 años"},
-        {min: 15, max: 15, capt: "15 a <16 años"},
-        {min: 16, max: 17, capt: "16 a <18 años"},
-        {min: 18, max: 19, capt: "18 a <20 años"},
-        {min: 20, max: 24, capt: "20 a <15 años"},
-        {min: 25, max: 29, capt: "25 a <30 años"},
-        {min: 30, max: 34, capt: "30 a <35 años"},
-        {min: 35, max: 39, capt: "35 a <40 años"},
-        {min: 40, max: 44, capt: "40 a <45 años"},
-        {min: 45, max: 49, capt: "45 a <50 años"},
-        {min: 50, max: 54, capt: "50 a <55 años"},
-        {min: 55, max: 59, capt: "55 a <59 años"},
-        {min: 60, max: 64, capt: "60 a <65 años"},
-        {min: 65, max: 69, capt: "65 a <70 años"},
-        {min: 70, max: 74, capt: "70 a <75 años"},
-        {min: 75, max: 79, capt: "75 a <79 años"},
-        {min: 80, max: 84, capt: "80 a <85 años"},
-        {min: 85, max: 89, capt: "85 a <90 años"},
-        {min: 90, max: 94, capt: "90 a <95 años"},
-        {min: 95, max: 99, capt: "95 a <100 años"},
-        {min: 100, max: 104, capt: "100 a <105 años"},
+        {min: 0, max: 0, capt: "<1"},
+        {min: 1, max: 1, capt: "1 a <2"},
+        {min: 2, max: 3, capt: "2 a <4"},
+        {min: 4, max: 4, capt: "4 a <5"},
+        {min: 5, max: 5, capt: "5 a <6"},
+        {min: 6, max: 7, capt: "6 a <8"},
+        {min: 8, max: 9, capt: "8 a <10"},
+        {min: 10, max: 11, capt: "10 a <12"},
+        {min: 12, max: 13, capt: "12 a <14"},
+        {min: 14, max: 14, capt: "14 a <15"},
+        {min: 15, max: 15, capt: "15 a <16"},
+        {min: 16, max: 17, capt: "16 a <18"},
+        {min: 18, max: 19, capt: "18 a <20"},
+        {min: 20, max: 24, capt: "20 a <15"},
+        {min: 25, max: 29, capt: "25 a <30"},
+        {min: 30, max: 34, capt: "30 a <35"},
+        {min: 35, max: 39, capt: "35 a <40"},
+        {min: 40, max: 44, capt: "40 a <45"},
+        {min: 45, max: 49, capt: "45 a <50"},
+        {min: 50, max: 54, capt: "50 a <55"},
+        {min: 55, max: 59, capt: "55 a <59"},
+        {min: 60, max: 64, capt: "60 a <65"},
+        {min: 65, max: 69, capt: "65 a <70"},
+        {min: 70, max: 74, capt: "70 a <75"},
+        {min: 75, max: 79, capt: "75 a <79"},
+        {min: 80, max: 84, capt: "80 a <85"},
+        {min: 85, max: 89, capt: "85 a <90"},
+        {min: 90, max: 94, capt: "90 a <95"},
+        {min: 95, max: 99, capt: "95 a <100"},
+        {min: 100, max: 104, capt: "100 a <105"},
         {min: 105, max: 109, capt: "105 a <110 años"}
         ];
         
@@ -97,7 +97,15 @@ function Irebifap (events, groups, rels) {
             if(index < group.events.length - 1) { cu+=" OR "; pa+= " OR "}
         });
         var cupa = "( " + cu + " ) y ( " + pa + " )";
-        self.events.push({short_name: group.short_name, full_name: group.full_name, type: group.type, events: group.events, cu: cu, pa: pa, cupa: cupa, rels: []});
+        self.events.push({
+            short_name: group.short_name, 
+            full_name: group.full_name, 
+            type: group.type, 
+            events: group.events, 
+            cu: cu, 
+            pa: pa, 
+            cupa: cupa, 
+            rels: {}});
 
     }); 
     
@@ -110,7 +118,10 @@ function Irebifap (events, groups, rels) {
         
         console.log(a);
         console.log(b);
-        a.rels[b.short_name] ={event: b.short_name, cu: "con al menos un día de "+a.full_name+" entre el 01/01/20XX - 31/12/20XX y al menos un día de "+b.full_name+" entre el 01/01/20XX - 31/12/20XX", ev: "con al menos un día en el que exista un curso de "+a.full_name+" y un curso de "+b.full_name+" simultáneamente"  };
+        a.rels[b.short_name] ={
+                event: b.short_name, 
+                cu: "con al menos un día de "+a.full_name+" entre el 01/01/20XX - 31/12/20XX y al menos un día de "+b.full_name+" entre el 01/01/20XX - 31/12/20XX", 
+                ev: "con al menos un día en el que exista un curso de "+a.full_name+" y un curso de "+b.full_name+" simultáneamente"  };
         
     
     
@@ -124,28 +135,43 @@ function Irebifap (events, groups, rels) {
                     short_name: event.short_name+"_20XX",
                     title: "Pacientes con "+event.full_name+" en 20XX",
                     vars: [event.cu],
-                    cells: [
-                        ["","Pacientes con "+event.full_name+" en 2014","","",""],
-                        ["","","Hombres","Mujeres","Ambos"]
-                    ]
 
                 }
+                if(event.events.length==0){
+                    // evento es unico
+                    t1.cells = [
+                                   //["Pacientes con "+event.full_name+" en 20XX","","",""],
+                                   ["Edad","Hombres","Mujeres","Ambos"]
+                               ]
+                } else {
+                    // evento es compuesto por otros eventos
+                    t1.cells = [
+                                   //["Pacientes con "+event.full_name+" en 20XX","","","",""],
+                                   ["Edad","Evento","Hombres","Mujeres","Ambos"]
+                               ]
+                };
                 self.age_groups.forEach(function(a){
-                    t1.cells.push([a.capt,event.full_name,"","",""]);
-                    event.events.forEach(function(e){
-                        var full_event = self.events[self.events_index.indexOf(e)];
-                        t1.cells.push(["",full_event.full_name,"","",""]);
-                    });
+                    if(event.events.length==0){
+                        t1.cells.push([a.capt,"","",""]);
+                    } else {
+                        t1.cells.push([a.capt,event.full_name,"","",""]);
+                        event.events.forEach(function(e){
+                            var full_event = self.events[self.events_index.indexOf(e)];
+                            t1.cells.push(["",full_event.full_name,"","",""]);
+                        });
+                    }
+                    
+
                 });
                 self.tables.push(t1); 
 
                 // tabla presencia en último año global
                 var t2 = {
-                    short_name: event.short_name+"_2014",
+                    short_name: event.short_name+"_20XX",
                     title: "Pacientes con "+event.full_name+" en 20XX",
                     vars: [event.cu],
                     cells: [
-                        ["Pacientes con "+event.full_name+" en 20XX","","",""],
+                        //["Pacientes con "+event.full_name+" en 20XX","","",""],
                         ["","Hombres","Mujeres","Ambos"]
                     ]
                 
@@ -173,7 +199,7 @@ function Irebifap (events, groups, rels) {
                title: "Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX",
                vars: [a.cu, b.cu, a.rels[b.short_name]['cu']],
                cells: [
-                   ["Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX","","",""],
+                   //["Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX","","",""],
                    ["","Con "+a.short_name,"Sin"+a.short_name,"Total"],
                    ["Con "+b.short_name,"","",""],
                    ["Sin "+b.short_name,"","",""],
@@ -278,14 +304,39 @@ $("#newEventBtn").click(function(e){
         j.preventDefault();
         $(this).parent().remove();
     });
-    
-    
-    
-    
-    
-    
-
 });
+
+$("#seeOutput").click(function(e){
+    set_num_cols = 4;
+    e.preventDefault();
+    output = "<div class=\"container\">";
+    
+    newIre.tables.forEach(function(table,index){
+
+        if(index%set_num_cols==set_num_cols){
+            output += "<div class=\"row\">\n";
+        } 
+        
+        output += "<div class=\"col-md-"+(12/set_num_cols).toString()+"\">\n";
+        output += "<div id=\""+table.shortname+"\" class=\"ireTable\">"+table.title
+            output += "<table class=\"table table-bordered\">";
+            table.cells.forEach(function(row,index){
+                output += "<tr>";
+                row.forEach(function(cell,index){
+                   output += "<td>"+cell+"</td>"; 
+                });
+                output += "</tr>";
+            });
+            output += "</table>";
+        output +="</div><!-- ireTable -->";
+        output +="</div><!-- col-md-4 -->";
+        if(index%set_num_cols==set_num_cols-1){
+            output += "</div><!-- row -->\n";
+        }
+    });
+    output += "</div> <!--container-fluid-->"
+    $("#tables").html(output);
+})
 
 $("#checkEvents").click(function(e){
     e.preventDefault();
