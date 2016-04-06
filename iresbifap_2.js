@@ -21,7 +21,9 @@ function Irebifap (events, groups, rels) {
     this.var_list = [];
     this.output = "";
     
-    this.age_groups = [
+    this.age_groups = {};
+    
+    this.age_groups.full = [
         {min: 0, max: 0, capt: "<1"},
         {min: 1, max: 1, capt: "1 a <2"},
         {min: 2, max: 3, capt: "2 a <4"},
@@ -52,15 +54,46 @@ function Irebifap (events, groups, rels) {
         {min: 90, max: 94, capt: "90 a <95"},
         {min: 95, max: 99, capt: "95 a <100"},
         {min: 100, max: 104, capt: "100 a <105"},
-        {min: 105, max: 109, capt: "105 a <110 años"}
+        {min: 105, max: 109, capt: "105 a <110 años"},
+        {min: 0, max: 109, capt: "Total"},
         ];
         
+    this.age_groups.pedi = [
+        {min: 0, max: 1, capt: "<2"},
+        {min: 2, max: 4, capt: "2 a 5"},
+        {min: 5, max: 9, capt: "5 a 10"},
+        {min: 10, max: 14, capt: "10 a 15"},
+        {min: 15, max: 17, capt: "15 a 18"},
+        {min: 0, max: 17, capt: "Total"}
+        ];
+        
+    this.age_groups.medfam =  [  
+        
+        {min: 18, max: 24, capt: "18 a 25"},
+        {min: 25, max: 44, capt: "25 a 45"},
+        {min: 45, max: 64, capt: "45 a 65"},
+        {min: 65, max: 84, capt: "65 a 85"},
+        {min: 85, max: 109, capt: "85+"},
+        {min: 18, max: 109, capt: "Total"}
+        ];
+
+    this.age_groups.oms = [
+        {min: 0, max: 1, capt: "0 a 2"},
+        {min: 2, max: 13, capt: "2 a 14"},
+        {min: 14, max: 24, capt: "14 a 25"},
+        {min: 25, max: 44, capt: "25 a 45"},
+        {min: 45, max: 64, capt: "45 a 65"},
+        {min: 65, max: 74, capt: "65 a 75"},
+        {min: 75, max: 109, capt: "75+"},
+        {min: 0, max: 109, capt: "Total"}
+        ];
+        
+    this.age_groups.global = [
+        {min: 0, max: 1, capt: "0 a 109"}
+        ]
+        
     this.sex = [{c: "Hombre", v: 0}, {c: "Mujer", v: 1}];
-    
-    /*[0,0];[1,1];[2,3];[4,4];[5,5];[6,7];[8,9];[10,11];[12,13];[14,14];[15,15];[16,17];[18,19];
-                      [20,24];[25,29];[30,34];[35,39];[40,44];[45,49];[50,54];[55,59];
-                      [60,64];[65,69];[70,74];[75,79];[80,84];[85,89];[90,94];[95,99];[100,104];[105,109].*/
-                      
+         
 
     // generates the events
     this.events.forEach(function(entry,index) {
@@ -81,19 +114,20 @@ function Irebifap (events, groups, rels) {
         self.events[index].pa = pa;
         //current and previous year present
         self.events[index].cupa = "( " + cu + " ) y ( " + pa + " ) ";
+
         
     });
     
     //each group of events is added as new event
     this.groups.forEach(function(group, index){
-        console.log("Nuevo evento combinado: "+group.short_name);
         self.events_index.push(group.short_name);
         var cu="";
         var pa= "";
         group.events.forEach(function(eventGroup,index){
-            //console.log(eventGroup);
-            cu += "con al menos un día de "+eventGroup+" entre el 01/01/20XX - 31/12/20XX ";
-            pa += "con al menos un día de "+eventGroup+" anterior al 01/01/20XX ";
+            
+            eventGroupFullName = self.events[self.events_index.indexOf(eventGroup)].full_name;
+            cu += "con al menos un día de "+eventGroupFullName+" entre el 01/01/20XX - 31/12/20XX ";
+            pa += "con al menos un día de "+eventGroupFullName+" anterior al 01/01/20XX ";
             if(index < group.events.length - 1) { cu+=" OR "; pa+= " OR "}
         });
         var cupa = "( " + cu + " ) y ( " + pa + " )";
@@ -104,7 +138,7 @@ function Irebifap (events, groups, rels) {
             events: group.events, 
             cu: cu, 
             pa: pa, 
-            cupa: cupa, 
+            cupa: cupa,
             rels: {}});
 
     }); 
@@ -116,8 +150,7 @@ function Irebifap (events, groups, rels) {
         var a = self.events[self.events_index.indexOf(relation[0])];
         var b = self.events[self.events_index.indexOf(relation[1])];
         
-        console.log(a);
-        console.log(b);
+
         a.rels[b.short_name] ={
                 event: b.short_name, 
                 cu: "con al menos un día de "+a.full_name+" entre el 01/01/20XX - 31/12/20XX y al menos un día de "+b.full_name+" entre el 01/01/20XX - 31/12/20XX", 
@@ -128,61 +161,159 @@ function Irebifap (events, groups, rels) {
     });
     
     this.buildTables = function () {
+        
+        self.tablaEventNewNumPac = function(event,age_groups){
+            // crea tabla con número pacientes que tienen 
+            // el evento en el ultimo año
+            
+            var t = {
+                short_name: event.short_name+"_20XX",
+                title: "Pacientes incidentes de "+event.full_name+" en 20XX",
+                vars: [event.cupa,event.cu],
+                foot: "Número total de pacientes con un primer "+event.full_name+" en 20XX"
+
+            }
+            if(event.events.length==0){
+                // evento es unico
+                t.cells = [
+                               
+                               ["Edad","Hombres","Mujeres","Ambos"]
+                           ]
+            } else {
+                // evento es compuesto por otros eventos
+                t.cells = [
+                               ["Edad","Evento","Hombres","Mujeres","Ambos"]
+                           ]
+            };
+            age_groups.forEach(function(a){
+                if(event.events.length==0){
+                    t.cells.push([a.capt,"","",""]);
+                } else {
+                    t.cells.push([a.capt,"Nuevos casos de "+event.full_name,"","",""]);
+                    event.events.forEach(function(e){
+                        var full_event = self.events[self.events_index.indexOf(e)];
+                        t.cells.push(["","Nuevos casos de "+full_event.full_name,"","",""]);
+                    });
+                }
+            });
+            return t;
+        }
+        
+        
+        self.tablaEventLastYearNumPac = function(event,age_groups){
+            // crea tabla con número pacientes que tienen 
+            // el evento en el ultimo año
+            
+            var t = {
+                short_name: event.short_name+"_20XX",
+                title: "Pacientes con "+event.full_name+" en 20XX",
+                vars: [event.cu],
+                foot: "Número total de pacientes con un "+event.full_name+" en 20XX"
+
+            }
+            if(event.events.length==0){
+                // evento es unico
+                t.cells = [
+                               
+                               ["Edad","Hombres","Mujeres","Ambos"]
+                           ]
+            } else {
+                // evento es compuesto por otros eventos
+                t.cells = [
+                               ["Edad","Evento","Hombres","Mujeres","Ambos"]
+                           ]
+            };
+            age_groups.forEach(function(a){
+                if(event.events.length==0){
+                    t.cells.push([a.capt,"","",""]);
+                } else {
+                    t.cells.push([a.capt,event.full_name,"","",""]);
+                    event.events.forEach(function(e){
+                        var full_event = self.events[self.events_index.indexOf(e)];
+                        t.cells.push(["",full_event.full_name,"","",""]);
+                    });
+                }
+            });
+            return t;
+        }
+        
+        self.tableAllEventsLastYearNumPac = function(e){
+            
+            var t = {
+                short_name: "ALLEVENTS_20XX",
+                title: "Pacientes con evento en 20XX",
+                vars: [],
+                foot: "Número total de pacientes con cada uno de los eventos presentes en 20XX"
+            }
+            
+            t.cells = [
+                
+                ["Evento","Hombres","Mujeres","Ambos"]
+            ]
+            
+            m = e.map(function(obj,index){
+                return obj.short_name;
+            });
+            
+            var n = m.slice(0); //clone m array
+            e.forEach(function(ev){
+                ev.events.forEach(function(sev){
+                    i = m.indexOf(sev);
+                    if(i >-1) {
+                        m.splice(i,1);
+                    }
+                })
+            });
+
+            // m contiene la lista de events que no son subevents de nadie
+            m.forEach(function(sn,i){
+                thisEvent = e[n.indexOf(sn)];
+                t.cells.push([thisEvent.full_name,"","",""]);
+                t.vars.push(thisEvent.cu);
+                
+                thisEvent.events.forEach(function(subEventShortName){
+                    subEvent = e[n.indexOf(subEventShortName)];
+                    t.cells.push([subEvent.full_name,"","",""]);
+                    t.vars.push(subEvent.cu);
+                    
+                })
+                
+            })
+            console.log(t);
+            return t;
+
+        }
+        
+        self.tablaContingenciaLastYear = function(a,b) {
+            var t = {
+               short_name: a.short_name+"_"+b.short_name+"_2014",
+               title: "Paciente con "+a.full_name+" y "+b.full_name+"  en 20XX, tabla de contingencia",
+               vars: [a.cu, b.cu, a.rels[b.short_name]['cu']],
+               cells: [
+                   //["Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX","","",""]
+                   ["","Con "+a.short_name,"Sin "+a.short_name,"Total"],
+                   ["Con "+b.short_name,"","",""],
+                   ["Sin "+b.short_name,"","",""],
+                   ["Total"+"","","",""]
+               ],
+               foot: "Tabla de contingencia de pacientes con al menos un día de "+a.full_name+" y "+b.full_name+" en 20XX"
+            }
+            return t;
+        }
+        
+        self.tables.push(self.tableAllEventsLastYearNumPac(self.events));
+        
         // tablas sobre eventos individuales (o grupos)
         self.events.forEach(function(event,index){
-                // tabla presencia en último año por edad y sexo
-                var t1 = {
-                    short_name: event.short_name+"_20XX",
-                    title: "Pacientes con "+event.full_name+" en 20XX",
-                    vars: [event.cu],
-
-                }
-                if(event.events.length==0){
-                    // evento es unico
-                    t1.cells = [
-                                   //["Pacientes con "+event.full_name+" en 20XX","","",""],
-                                   ["Edad","Hombres","Mujeres","Ambos"]
-                               ]
-                } else {
-                    // evento es compuesto por otros eventos
-                    t1.cells = [
-                                   //["Pacientes con "+event.full_name+" en 20XX","","","",""],
-                                   ["Edad","Evento","Hombres","Mujeres","Ambos"]
-                               ]
-                };
-                self.age_groups.forEach(function(a){
-                    if(event.events.length==0){
-                        t1.cells.push([a.capt,"","",""]);
-                    } else {
-                        t1.cells.push([a.capt,event.full_name,"","",""]);
-                        event.events.forEach(function(e){
-                            var full_event = self.events[self.events_index.indexOf(e)];
-                            t1.cells.push(["",full_event.full_name,"","",""]);
-                        });
-                    }
-                    
-
-                });
-                self.tables.push(t1); 
-
-                // tabla presencia en último año global
-                var t2 = {
-                    short_name: event.short_name+"_20XX",
-                    title: "Pacientes con "+event.full_name+" en 20XX",
-                    vars: [event.cu],
-                    cells: [
-                        //["Pacientes con "+event.full_name+" en 20XX","","",""],
-                        ["","Hombres","Mujeres","Ambos"]
-                    ]
+                self.tables.push(self.tablaEventLastYearNumPac(event,self.age_groups.pedi));
+                self.tables.push(self.tablaEventLastYearNumPac(event,self.age_groups.medfam));
+                self.tables.push(self.tablaEventLastYearNumPac(event,self.age_groups.oms));
+                self.tables.push(self.tablaEventLastYearNumPac(event,self.age_groups.global));
                 
-                }
-                t2.cells.push([event.full_name,"","",""]);
-                event.events.forEach(function(e){
-                    var full_event = self.events[self.events_index.indexOf(e)];
-                    t2.cells.push([full_event.full_name,"","",""]);
-                });
-
-                self.tables.push(t2); 
+                self.tables.push(self.tablaEventNewNumPac(event,self.age_groups.pedi));
+                self.tables.push(self.tablaEventNewNumPac(event,self.age_groups.medfam));
+                self.tables.push(self.tablaEventNewNumPac(event,self.age_groups.oms));
+                self.tables.push(self.tablaEventNewNumPac(event,self.age_groups.global));
         });
         
         // tablas sobre relaciones entre eventos
@@ -191,23 +322,7 @@ function Irebifap (events, groups, rels) {
             
             var a = self.events[self.events_index.indexOf(rel[0])];
             var b = self.events[self.events_index.indexOf(rel[1])];
-            
-            
-            // tabla de contingencia
-            var t = {
-               short_name: a.short_name+"_"+b.short_name+"_2014",
-               title: "Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX",
-               vars: [a.cu, b.cu, a.rels[b.short_name]['cu']],
-               cells: [
-                   //["Tabla de contingencia entre "+a.full_name+" y "+b.full_name+"  en 20XX","","",""],
-                   ["","Con "+a.short_name,"Sin"+a.short_name,"Total"],
-                   ["Con "+b.short_name,"","",""],
-                   ["Sin "+b.short_name,"","",""],
-                   ["Total"+"","","",""]
-               ]
-           
-            }
-            self.tables.push(t);
+            self.tables.push(self.tablaContingenciaLastYear(a,b));
         });
         
     }
@@ -238,14 +353,14 @@ function Irebifap (events, groups, rels) {
 
 
 var events = [
-    {short_name: "AAAAAA", full_name: "aaaaaaaaaaaaa", type: "medicine"}, 
-    {short_name: "BBBBBB", full_name: "bbbbbbbbbbbbb", type: "diagnosis"},
-    {short_name: "CCCCCC", full_name: "ccccccccccccc", type: "medicine"}
+    {short_name: "OMEPRA", full_name: "Omeprazol", type: "medicine"}, 
+    {short_name: "ESOMEPRA", full_name: "Esomeprazol", type: "medicine"},
+    {short_name: "ULCERPEPT", full_name: "Úlcera Péptica", type: "diagnosis"}
     ];
 
-var groups = [{short_name: "AAABBB", full_name: "abababababab", type: "group", events: ["AAAAAA","BBBBBB"]}];
+var groups = [{short_name: "IBP", full_name: "Inhibidores de la bomba de protones", type: "group", events: ["OMEPRA","ESOMEPRA"]}];
 
-var rels = [["AAAAAA","BBBBBB"],["AAAAAA","CCCCCC"]];
+var rels = [["OMEPRA","ULCERPEPT"],["ESOMEPRA","ULCERPEPT"],["IBP","ULCERPEPT"]];
 
 
 
@@ -307,9 +422,10 @@ $("#newEventBtn").click(function(e){
 });
 
 $("#seeOutput").click(function(e){
-    set_num_cols = 4;
+    set_num_cols = 1;
     e.preventDefault();
     output = "<div class=\"container\">";
+
     
     newIre.tables.forEach(function(table,index){
 
@@ -318,7 +434,8 @@ $("#seeOutput").click(function(e){
         } 
         
         output += "<div class=\"col-md-"+(12/set_num_cols).toString()+"\">\n";
-        output += "<div id=\""+table.shortname+"\" class=\"ireTable\">"+table.title
+        output += "<div id=\""+table.shortname+"\" class=\"ireTable\">\n";
+        output += "<div class=\"ireTableTitle\">"+table.title+"</div>";
             output += "<table class=\"table table-bordered\">";
             table.cells.forEach(function(row,index){
                 output += "<tr>";
@@ -328,13 +445,16 @@ $("#seeOutput").click(function(e){
                 output += "</tr>";
             });
             output += "</table>";
+        output += "<div class=\"ireTableFoot\">"+table.foot+"</div>"
         output +="</div><!-- ireTable -->";
-        output +="</div><!-- col-md-4 -->";
+        output +="</div><!-- col-md- -->";
         if(index%set_num_cols==set_num_cols-1){
             output += "</div><!-- row -->\n";
         }
     });
-    output += "</div> <!--container-fluid-->"
+
+
+    output += "</div> <!--container-->";
     $("#tables").html(output);
 })
 

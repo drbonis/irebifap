@@ -1,3 +1,46 @@
 .ireTable table {
     font-size: small;
 }
+
+.ireTableFoot {
+    font-style: italic;
+    color: grey;
+}
+
+.ireTableTitle {
+    font-weight: bold;
+}
+
+.ireTable {
+
+    border: 1px rgb(89,89,89) solid;
+    
+    padding: 15px;
+    
+    margin: 20px;
+    
+    background: rgb(255, 255, 255);
+    
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    
+    -moz-box-shadow:  0px 0px 15px 0px rgb(128,128,128);
+    -webkit-box-shadow:  0px 0px 15px 0px rgb(128,128,128);
+    box-shadow:  0px 0px 15px 0px rgb(128,128,128);
+}
+
+.ireTable:hover {
+
+    border: 1px rgb(89,89,89) solid;
+    
+    background: rgb(239, 239, 239);
+    
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    
+    -moz-box-shadow:  0px 0px 15px 0px rgb(128,128,128);
+    -webkit-box-shadow:  0px 0px 15px 0px rgb(128,128,128);
+    box-shadow:  0px 0px 15px 0px rgb(128,128,128);
+}
