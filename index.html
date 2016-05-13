@@ -20,33 +20,87 @@
        
        <link rel ="stylesheet" href="./iresbifap.css">
     </head>
+    
+    
     <body>
-        <h3>Variables a calcular</h3>
-        <div id="formulario">
-            <form>
-                <div id="eventFormList">
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="navbar navbar-default navbar-fixed-top">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                              <span class="sr-only">Toggle navigation</span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="#">Generador de Informes Unidad de Atención al Colaborador BIFAP</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav navbar-right">
+                              <li><a href="#">Variables</a></li>
+                              <li><a href="#">Tablas</a></li>
+                              <li><a href="#">Gráficos</a></li>
+                              <li><a href="#">Resultado</a></li>
+                            </ul>
+                        </div>
+                    </div>
 
-                </div>
-                <button id="newEventBtn">Nuevo evento</button>
-                <button id="checkEvents">Check events</button>
-                <button id="seeOutput">See Output</button>
-            </form>
-        </div>
-        <div id="relaciones">
-            <form>
-               <div id="relationFormList">
 
-               </div> 
-            </form>
-        </div>
-        <div id="output">
-            <div id="tables">
-                
+                </nav>
             </div>
-            
-            
-            
+            <div id="pantalla_variables" class="row">
+
+                    <div class="col-md-2">
+
+                        <ul class="nav nav-slidebar">
+                          <li class="active"><a class="button" href="#">Variables</a></li>
+                          <li><a class="button" href="#">Grupos</a></li>
+                          <li><a class="button" href="#">Relaciones</a></li>
+                          <li><a class="button" href="#">Resumen</a></li>
+                          
+                        </ul>
+                    </div>
+                    <div id="pantalla_variables_variables" class="col-md-10">
+                        <h3>Listado de variables <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nueva variable</button>  </h3>
+
+                                <select id="listado_variables" class="form-control">
+                                </select>
+
+
+
+                    </div>
+                </div>
+
+        </div>    
+
+        <div id="modalsContainer">
+            <div id="modal_nueva_variable" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Nueva variable</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div>
+                                <label for="new_variable_shortname">Nombre corto:</label>
+                                <input class="form-control" id="new_variable_shortname" type="text"></input>
+                                <label for="new_variable_fullname">Nombre completo:</label>
+                                <input class="form-control" id="new_variable_fullname" type="text"></input>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                            <button id="btn_nueva_variable" type="button" class="btn btn-primary">Crear</button>
+                        </div>
+                        </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
         </div>
+
     </body>
     <script src="iresbifap_2.js"></script>
+    <script src="iresbifapweb.js"></script>
+    <script src="iresbifapapi.js"></script>
 </html>
