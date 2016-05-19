@@ -279,7 +279,7 @@ function Irebifap (events, groups, rels) {
                 })
                 
             })
-            console.log(t);
+
             return t;
 
         }
@@ -367,10 +367,7 @@ var rels = [["OMEPRA","ULCERPEPT"],["ESOMEPRA","ULCERPEPT"],["IBP","ULCERPEPT"]]
 var newIre = new Irebifap(events, groups, rels);
 newIre.buildOutput();
 newIre.buildTables();
-console.log(newIre);
 
-
-//document.getElementById("output").innerHTML = output;
 
 
 

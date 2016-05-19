@@ -42,6 +42,7 @@
                               <li><a href="#">Tablas</a></li>
                               <li><a href="#">Gráficos</a></li>
                               <li><a href="#">Resultado</a></li>
+                              <li><a id="testbtn" href="#">TestButton</a></li>
                             </ul>
                         </div>
                     </div>
@@ -54,20 +55,37 @@
                     <div class="col-md-2">
 
                         <ul class="nav nav-slidebar">
-                          <li class="active"><a class="button" href="#">Variables</a></li>
+                          <li id="subsecVariablesVariables" class="active"><a class="button" href="#">Variables</a></li>
                           <li><a class="button" href="#">Grupos</a></li>
                           <li><a class="button" href="#">Relaciones</a></li>
-                          <li><a class="button" href="#">Resumen</a></li>
+                          <li><a id="subsecVariablesResumen" class="button" href="#">Resumen</a></li>
                           
                         </ul>
                     </div>
                     <div id="pantalla_variables_variables" class="col-md-10">
-                        <h3>Listado de variables <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nueva variable</button>  </h3>
+                        <div id="var_selector" class="row subsect">
+                            <h3>Listado de variables <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nueva variable</button>  </h3>
+                            <select id="listado_variables" class="form-control"></select>
+                        </div>
+                        <div id="variables_container" class="row subsect">
 
-                                <select id="listado_variables" class="form-control">
+                        </div>
+                        
+                        <div id="variables_resumen_container" class="row hidden subsect">
+                            
+                        </div>
+                        <div id="covariable_template" class="hidden">
+                            <div>Nombre corto: <input id="{$nombre_corto_id}" class="form-control var-shortname-input" value="{$nombre_corto}"/></div>
+                            <div>Nombre completo: <input id="{$nombre_completo_id}" class="form-control var-fullname-input" value="{$nombre_completo}"/></div>
+                            <div>Tipo de variable: 
+                                <select id="{$tipo_id}" class="form-control var-type-select">
+                                    <option selected value="diagnostico">Diagnóstico</option>
+                                    <option value="farmaco">Fármaco</option>
                                 </select>
-
-
+                            </div>
+                            
+                        </div>
+                        
 
                     </div>
                 </div>
@@ -88,11 +106,16 @@
                                 <input class="form-control" id="new_variable_shortname" type="text"></input>
                                 <label for="new_variable_fullname">Nombre completo:</label>
                                 <input class="form-control" id="new_variable_fullname" type="text"></input>
+                                <label for="new_variable_type">Tipo de variable:</label>
+                                <select id="new_variable_type" class="form-control">
+                                    <option selected value="diagnostico">Diagnóstico</option>
+                                    <option value="farmaco">Fármaco</option>
+                                </select>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                            <button id="btn_nueva_variable" type="button" class="btn btn-primary">Crear</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" modal-ref="modal_nueva_variable">Cancelar</button>
+                            <button id="btn_nueva_variable" type="button" class="btn btn-primary" modal-ref="modal_nueva_variable">Crear</button>
                         </div>
                         </div><!-- /.modal-content -->
                 </div><!-- /.modal-dialog -->

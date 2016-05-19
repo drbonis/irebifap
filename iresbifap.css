@@ -2,10 +2,9 @@ body {
     padding-top: 70px;
 }
 
-.centered {
-    margin: ;
+.hidden {
+    display: none;
 }
-
 .ireTable table {
     font-size: small;
 }
