@@ -3,6 +3,7 @@ var BIFAP = BIFAP || {};
 BIFAP.ire = function () {
     var self = this;
     self.variables = [];
+    self.groups = [];
     
     //for testing
     self.variables = [{'shortname':'VARIABLE_A', 
@@ -14,25 +15,60 @@ BIFAP.ire = function () {
                      'type': 'farmaco'
                      }
                     ];
+                    
+    self.groups = [{'shortname':'GROUP_A',
+                    'fullname':'Grupo A completo',
+                    'variables': ["VARIABLE_A","VARIABLE_B"]
+                    }];
     
+    self.shortnameExists = function(shortname) {
+        if(self.getVariableByShortname(shortname) < 0 && self.getGroupByShortname(shortname) < 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
     
-    self.newVariable = function(varparams = {'shortname': '', 'fullname': ''}) {
-        self.variables.push({'shortname': varparams.shortname || '', 
-                        'fullname': varparams.fullname || '',
-                        'type': varparams.type || ''
-                        });
+    self.newGroup = function(varparams = {'shortname': '', 'fullname': '', 'variables': []}) {
+        //pendiente de incluir que todas las variables del grupo existen y 
+        //que shortname es único tanto en variables como groups
+        if(self.shortnameExists(varparams.shortname) == false) {
+            self.groups.push({'shortname': varparams.shortname || '', 
+                              'fullname': varparams.fullname || '',
+                              'variables': varparams.type || []});
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+
+    
+    self.newVariable = function(varparams = {'shortname': '', 'fullname': '', 'type': ''}) {
+        //pendiente de incluir check de que shortname es único tanto en variables como groups
+        if(self.shortnameExists(varparams.shortname) == false) {
+            self.variables.push({'shortname': varparams.shortname || '', 
+                            'fullname': varparams.fullname || '',
+                            'type': varparams.type || ''
+                            });
+        }
+    }
+    
+    self.getGroups = function () {
+        //pendiente de hacer groups privado
+        return self.groups;
     }
     
     self.getVariables = function() {
+        //pendiente de hacer variables privado
         return self.variables;
     };
     
-    self.getVariableByShortname = function(shortname) {
+    self.getElementByShortname = function(array,shortname) {
         //returns index, if not found -1
-        var variables = self.getVariables();
         var found_index = -1;
-        for (i = 0; i < variables.length; i++) {
-            if (shortname === variables[i].shortname) { 
+        for (i = 0; i < array.length; i++) {
+            if (shortname === array[i].shortname) { 
                 var found_index = i;
                 break;
             } 
@@ -40,10 +76,80 @@ BIFAP.ire = function () {
         return found_index;
     }
     
+    self.getGroupByShortname = function(shortname) {
+        //returns index, if not found -1
+        var groups = self.getGroups();
+        return self.getElementByShortname(groups,shortname);
+    }
+    
+    self.getVariableByShortname = function(shortname) {
+        //returns index, if not found -1
+        var variables = self.getVariables();
+        return self.getElementByShortname(variables,shortname);
+    }
+    
+    self.updateGroup = function(index,updatedGroup = {}) {
+        updated_keys = Object.keys(updatedGroup);
+        if(updated_keys.indexOf("shortname") >= 0 && self.shortNameExists(updatedGroup.shortname)) {
+            // update contiene shortname que ya existe
+            return false;
+        } else{
+            updated_keys.forEach(function(j,i){
+                self.groups[index][j] = updatedGroup[j];
+            });
+            return true;
+        }
+    }
+    
     self.updateVariable = function(index,updatedVariable = {}) {
         updated_keys = Object.keys(updatedVariable);
-        updated_keys.forEach(function(j,i){
-            self.variables[index][j] = updatedVariable[j];
+        if(updated_keys.indexOf("shortname") >= 0 && self.shortnameExists(updatedVariable.shortname)) {
+            // update contiene shortname que ya existe
+            return false;
+        } else{
+            updated_keys.forEach(function(j,i){
+                self.variables[index][j] = updatedVariable[j];
+            });
+            return true;
+        }
+    }
+    
+    self.delVariable = function(index) {
+        self.variables.splice(index,1);
+    }
+    
+    self.delVariable = function(index) {
+        self.variables.splice(index,1);
+    }
+    
+    self.addVariableToGroup = function(group_index, variable) {
+        if(group_index >= 0) {
+            var i = self.groups[group_index].variables.indexOf(variable);
+            
+            if (i < 0 && self.shortnameExists(variable)) {
+                self.groups[group_index].variables.push(variable);
+                return self.groups[group_index];
+            } else {
+                return false;
+            }
+            
+        } else {
+            return false;
+        }
+    }
+    
+    self.removeVariableFromGroup = function(group_index, variable) {
+        var i = self.groups[group_index].variables.indexOf(variable);
+        if (i >= 0) {
+            self.groups[group_index].variables.splice(i,1);
+        }
+        return self.groups[group_index];
+    }
+    
+    self.removeVariableFromAllGroups = function(variable) {
+        self.groups.forEach(function(i){
+            i.variables.splice(i.variables.indexOf(variable),1);
         });
+        return true;
     }
 }

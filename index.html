@@ -56,34 +56,60 @@
 
                         <ul class="nav nav-slidebar">
                           <li id="subsecVariablesVariables" class="active"><a class="button" href="#">Variables</a></li>
-                          <li><a class="button" href="#">Grupos</a></li>
+                          <li><a id="subsecVariablesGrupos" class="button" href="#">Grupos</a></li>
                           <li><a class="button" href="#">Relaciones</a></li>
                           <li><a id="subsecVariablesResumen" class="button" href="#">Resumen</a></li>
                           
                         </ul>
                     </div>
                     <div id="pantalla_variables_variables" class="col-md-10">
+                        
                         <div id="var_selector" class="row subsect">
                             <h3>Listado de variables <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nueva variable</button>  </h3>
                             <select id="listado_variables" class="form-control"></select>
                         </div>
+                        
+                        
                         <div id="variables_container" class="row subsect">
 
+                        </div>
+                        
+                        <div id="group_selector" class="row subsect">
+                            <h3>Listado de grupos <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nuevo grupo</button>  </h3>
+                            <select id="listado_grupos" class="form-control"></select>
+                        </div>
+                        
+                        <div id="variables_groups_container" class="row hidden subsect">
+                            
                         </div>
                         
                         <div id="variables_resumen_container" class="row hidden subsect">
                             
                         </div>
                         <div id="covariable_template" class="hidden">
-                            <div>Nombre corto: <input id="{$nombre_corto_id}" class="form-control var-shortname-input" value="{$nombre_corto}"/></div>
-                            <div>Nombre completo: <input id="{$nombre_completo_id}" class="form-control var-fullname-input" value="{$nombre_completo}"/></div>
-                            <div>Tipo de variable: 
-                                <select id="{$tipo_id}" class="form-control var-type-select">
-                                    <option selected value="diagnostico">Diagnóstico</option>
-                                    <option value="farmaco">Fármaco</option>
-                                </select>
+
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 id="{$heading_id}" class="panel-title">{$nombre_corto}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div>Nombre corto: <input id="{$nombre_corto_id}" class="form-control var-shortname-input" value="{$nombre_corto}"/></div>
+                                    <div>Nombre completo: <input id="{$nombre_completo_id}" class="form-control var-fullname-input" value="{$nombre_completo}"/></div>
+                                    <div>Tipo de variable: 
+                                        <select id="{$tipo_id}" class="form-control var-type-select">
+                                            <option selected value="diagnostico">Diagnóstico</option>
+                                            <option value="farmaco">Fármaco</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="panel-footer">
+                                    <div><button id="{$btn_borrar_id}" class="btn btn-danger">Borrar</button></div>
+                                </div>
                             </div>
-                            
+                                
+                                
+
                         </div>
                         
 
