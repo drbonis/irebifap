@@ -23,6 +23,7 @@
     
     
     <body>
+        
         <div class="container-fluid">
             <div class="row">
                 <nav class="navbar navbar-default navbar-fixed-top">
@@ -74,12 +75,13 @@
 
                         </div>
                         
-                        <div id="group_selector" class="row subsect">
-                            <h3>Listado de grupos <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nuevo grupo</button>  </h3>
+                        <div id="group_selector" class="row subsect hidden">
+                            <h3>Listado de grupos <button id="btn_nuevo_grupo_launcher" class="btn btn-default">Nuevo grupo</button></h3>
+
                             <select id="listado_grupos" class="form-control"></select>
                         </div>
                         
-                        <div id="variables_groups_container" class="row hidden subsect">
+                        <div id="variables_group_container" class="row hidden subsect">
                             
                         </div>
                         
@@ -107,9 +109,6 @@
                                     <div><button id="{$btn_borrar_id}" class="btn btn-danger">Borrar</button></div>
                                 </div>
                             </div>
-                                
-                                
-
                         </div>
                         
 
@@ -129,7 +128,7 @@
                         <div class="modal-body">
                             <div>
                                 <label for="new_variable_shortname">Nombre corto:</label>
-                                <input class="form-control" id="new_variable_shortname" type="text"></input>
+                                <input class="form-control" id="new_variable_shortname" type="text" maxlength="16"></input>
                                 <label for="new_variable_fullname">Nombre completo:</label>
                                 <input class="form-control" id="new_variable_fullname" type="text"></input>
                                 <label for="new_variable_type">Tipo de variable:</label>
@@ -145,7 +144,49 @@
                         </div>
                         </div><!-- /.modal-content -->
                 </div><!-- /.modal-dialog -->
-            </div><!-- /.modal -->
+            </div><!-- /.modal_nueva_variable -->
+            
+            <div id="modal_nuevo_grupo" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Nuevo grupo</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div>
+                                <label for="new_group_shortname">Nombre corto:</label>
+                                <input class="form-control" id="new_group_shortname" type="text" maxlength="16"></input>
+                                <label for="new_group_fullname">Nombre completo:</label>
+                                <input class="form-control" id="new_group_fullname" type="text"></input>
+                                <strong>Variables que componen el grupo:</strong>
+                                <div id="lista_grupos_con_checklist">
+                                    
+                                    <!-- aqui se inserta el variable_checklist_row_template -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" modal-ref="modal_nuevo_grupo">Cancelar</button>
+                            <button id="btn_nuevo_grupo" type="button" class="btn btn-primary" modal-ref="modal_nuevo_grupo">Crear</button>
+                        </div>
+                        </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal_nuevo_grupo-->
+            
+            <!-- este div no se muestra nunca, es un template para la lista de variables de modal_nuevo_grupo-->
+            <div id="variable_checklist_row_template" class="hidden">
+                
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="checkbox-inline"><input type="checkbox" id="variable_checkbox_{$shortname}" value="{$shortname}" class="variable-de-grupo">{$shortname}</label>
+                        </div>
+                        <div class="col-md-8">{$fullname}</div>
+                    </div>
+                
+                </div>
+            <!-- fin de template para la lista de variables de modal_nuevo_grupo-->
+            
         </div>
 
     </body>

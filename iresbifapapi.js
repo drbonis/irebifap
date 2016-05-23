@@ -13,12 +13,20 @@ BIFAP.ire = function () {
                      {'shortname':'VARIABLE_B', 
                      'fullname': 'variable b completa',
                      'type': 'farmaco'
+                     },
+                     {'shortname':'VARIABLE_C', 
+                     'fullname': 'variable c completa',
+                     'type': 'farmaco'
                      }
                     ];
                     
     self.groups = [{'shortname':'GROUP_A',
                     'fullname':'Grupo A completo',
                     'variables': ["VARIABLE_A","VARIABLE_B"]
+                    },
+                    {'shortname':'GROUP_B',
+                    'fullname':'Grupo B completo',
+                    'variables': ["VARIABLE_B","VARIABLE_C"]
                     }];
     
     self.shortnameExists = function(shortname) {
@@ -35,7 +43,7 @@ BIFAP.ire = function () {
         if(self.shortnameExists(varparams.shortname) == false) {
             self.groups.push({'shortname': varparams.shortname || '', 
                               'fullname': varparams.fullname || '',
-                              'variables': varparams.type || []});
+                              'variables': varparams.variables || []});
             return true;
         } else {
             return false;

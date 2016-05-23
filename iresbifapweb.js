@@ -8,22 +8,42 @@ $(document).ready(function(){
     
     
 
-    
+    normalizeShortname = function(dom_element) {
+        if(dom_element.val().length > 16) {
+            dom_element.val(dom_element.val().slice(0,16));
+        }
+        dom_element.val(dom_element.val().toUpperCase().replace(' ','_'));
+    }
     
     
     resetModal = function (modal) {
         modal.modal("hide");
-        $.each($(modal).find("input"), function(i,e){
+        $.each($(modal).find("input[type=text]"), function(i,e){
             $(e).val("");
         });
         $.each($(modal).find("select"), function(i,e){
             $(e).val($(e).find("option").first().val());
         });
+        $.each($(modal).find("input[type=checkbox]"),function(i,e){
+            $(e).attr("checked",false);
+        })
     }
 
+    reloadGroups = function(select_obj, groups_container,ire,focusVariable) {
+        groups_container.html("");
+        select_obj.html("");
+        select_obj.val("");
+        
+        if(ire.getGroups().length>0) {
+            $.each(ire.getGroups(),function(i,g){
+               console.log(g);
+               select_obj.append("<option value=\""+g.shortname+"\">"+g.fullname+" ("+g.shortname+")</option>");
+            });
+            
+            select_obj.val(focusVariable.shortname);
+        }
+    }
 
-
-    
     reloadCovariables = function(select_obj, covariables_container,ire,focusVariable) {
         
         
@@ -57,10 +77,10 @@ $(document).ready(function(){
                 
                 //asigno eventos a los elementos de esa variable
     
-                $("#var_"+v.shortname+"_shortname").on("keyup",function(e){
+                $("#var_"+v.shortname+"_shortname").on("input",function(e){
                     // chequear que nombre corto cumple requisitos
-                    
-                    $(this).val($(this).val().toUpperCase().replace(' ','_'));
+                    normalizeShortname($(this));
+                    //$(this).val($(this).val().toUpperCase().replace(' ','_'));
                     
                     
                     var varPrev = ire.getVariables()[i];
@@ -80,7 +100,7 @@ $(document).ready(function(){
                 });
                 
                 
-                $("#var_"+v.shortname+"_fullname").on("keyup",function(e){
+                $("#var_"+v.shortname+"_fullname").on("input",function(e){
                     $(select_obj.find("option")[i]).html($(this).val()+" ("+v.shortname+")");
                     varUpdate(i,'fullname',$(this).val());
                 });
@@ -124,6 +144,30 @@ $(document).ready(function(){
         resetModal($("#"+$(this).attr("modal-ref")));
     });
     
+    
+    $("#btn_nuevo_grupo").on("click",function(e){
+
+        newGroupVariables = [];
+        $.each($("#lista_grupos_con_checklist .variable-de-grupo"), function(i,e){
+            if($(e).prop('checked')) {
+                newGroupVariables.push($(e).val());
+                console.log($(e).val());
+            }
+        });
+        console.log(newGroupVariables);
+        
+        var newGroup = {
+                        'shortname': $("#new_group_shortname").val(),
+                        'fullname': $("#new_group_fullname").val(),
+                        'variables': newGroupVariables
+        }
+
+        ire.newGroup(newGroup);
+        reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,newGroup);
+
+        resetModal($("#"+$(this).attr("modal-ref")));
+    })
+    
     $("#listado_variables").on("change", function(e){
         console.log(e);
         showCovariableDetails($("#variables_container"),$("#var_"+$(this).val()));
@@ -131,7 +175,28 @@ $(document).ready(function(){
     
     $("#testbtn").on("click",function(e){
         e.preventDefault();
-        reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);
+    });
+    
+    $("#btn_nuevo_grupo_launcher").on("click", function(e){
+        e.preventDefault();
+        $("#modal_nuevo_grupo").modal('show');
+        $("#lista_grupos_con_checklist").html("");
+        var variables = ire.getVariables();
+        variables.forEach(function(v){
+            new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname\}/g,v.shortname).replace(/\{\$fullname\}/g,v.fullname);
+            $("#lista_grupos_con_checklist").append(new_checkbox_html);
+            
+        });
+        
+        
+    });
+    
+    $("#new_variable_shortname").on("input",function(e){
+        normalizeShortname($(this));
+    });
+    
+    $("#new_group_shortname").on("input", function(e){
+        normalizeShortname($(this));
     });
 
     $("#subsecVariablesResumen").on("click",function(){
@@ -182,8 +247,10 @@ $(document).ready(function(){
             }
         });
 
-            //$("#var_selector").toggleClass("hidden");
-            $("#variables_groups_container").toggleClass("hidden");
+        $("#group_selector").toggleClass("hidden");
+        $("#variables_groups_container").toggleClass("hidden");
+        
+        reloadGroups($("#listado_grupos"), $("#variabrles_group_container"),ire,ire.getGroups()[0]);
     });
 
     reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);  
