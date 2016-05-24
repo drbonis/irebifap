@@ -98,7 +98,7 @@ BIFAP.ire = function () {
     
     self.updateGroup = function(index,updatedGroup = {}) {
         updated_keys = Object.keys(updatedGroup);
-        if(updated_keys.indexOf("shortname") >= 0 && self.shortNameExists(updatedGroup.shortname)) {
+        if(updated_keys.indexOf("shortname") >= 0 && self.shortnameExists(updatedGroup.shortname)) {
             // update contiene shortname que ya existe
             return false;
         } else{
@@ -116,18 +116,35 @@ BIFAP.ire = function () {
             return false;
         } else{
             updated_keys.forEach(function(j,i){
+                //aqui al actualizar shortname hay que actualizar el array de variables
+                //de los groups que contienen esa variable
+                var oldVar = self.variables[index][j];
                 self.variables[index][j] = updatedVariable[j];
+                if(j == "shortname") {
+                    self.updateGroupVariablesShortname(oldVar,updatedVariable[j]);   
+                }
+                
             });
             return true;
         }
     }
     
-    self.delVariable = function(index) {
-        self.variables.splice(index,1);
+    self.updateGroupVariablesShortname = function (oldShortname,newShortname) {
+        self.getGroups().forEach(function(g,i){
+           self.removeVariableFromGroup(i, oldShortname);
+           self.addVariableToGroup(i, newShortname);
+        });
     }
     
     self.delVariable = function(index) {
+        self.getGroups().forEach(function(g,i){
+            self.removeVariableFromGroup(i, self.variables[index].shortname);
+        });
         self.variables.splice(index,1);
+    }
+    
+    self.delGroup = function(index) {
+        self.groups.splice(index,1);
     }
     
     self.addVariableToGroup = function(group_index, variable) {

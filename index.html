@@ -88,9 +88,8 @@
                         <div id="variables_resumen_container" class="row hidden subsect">
                             
                         </div>
+                        
                         <div id="covariable_template" class="hidden">
-
-
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <h3 id="{$heading_id}" class="panel-title">{$nombre_corto}</h3>
@@ -103,6 +102,26 @@
                                             <option selected value="diagnostico">Diagnóstico</option>
                                             <option value="farmaco">Fármaco</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="panel-footer">
+                                    <div><button id="{$btn_borrar_id}" class="btn btn-danger">Borrar</button></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="group_template" class="hidden">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 id="{$heading_id}" class="panel-title">{$nombre_corto}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div>Nombre corto: <input id="{$nombre_corto_id}" class="form-control var-shortname-input" value="{$nombre_corto}"/></div>
+                                    <div>Nombre completo: <input id="{$nombre_completo_id}" class="form-control var-fullname-input" value="{$nombre_completo}"/></div>
+                                    <div>Variables que componen el grupo: 
+                                        <div id="lista_grupos_con_checklist_{$nombre_corto}">
+                                            <!-- aqui se inserta el variable_checklist_row_template -->
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="panel-footer">
@@ -179,7 +198,7 @@
                 
                     <div class="row">
                         <div class="col-md-4">
-                            <label class="checkbox-inline"><input type="checkbox" id="variable_checkbox_{$shortname}" value="{$shortname}" class="variable-de-grupo">{$shortname}</label>
+                            <label class="checkbox-inline"><input type="checkbox" id="variable_checkbox_{$shortname_id}" value="{$shortname}" class="variable-de-grupo">{$shortname}</label>
                         </div>
                         <div class="col-md-8">{$fullname}</div>
                     </div>

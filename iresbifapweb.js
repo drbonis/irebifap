@@ -29,18 +29,88 @@ $(document).ready(function(){
         })
     }
 
-    reloadGroups = function(select_obj, groups_container,ire,focusVariable) {
+    reloadGroups = function(select_obj, groups_container,ire,focusGroup) {
+        
+        grpUpdate = function(grpindex, key , newGrp) {
+            myhash = {}
+            myhash[key] = newGrp
+            return ire.updateGroup(grpindex,myhash);
+        };
+
+        
         groups_container.html("");
         select_obj.html("");
         select_obj.val("");
         
         if(ire.getGroups().length>0) {
             $.each(ire.getGroups(),function(i,g){
-               console.log(g);
+                //group container generation
+                templateGroupHtml = $("#group_template").html();
+                
+                newGroupHtml = templateGroupHtml.replace("{$nombre_completo_id}","grp_"+g.shortname+"_fullname");
+                newGroupHtml = newGroupHtml.replace("{$nombre_completo}",g.fullname);
+                newGroupHtml = newGroupHtml.replace("{$nombre_corto_id}","grp_"+g.shortname+"_shortname");
+                newGroupHtml = newGroupHtml.replace(/\{\$nombre_corto\}/g,g.shortname);
+                newGroupHtml = newGroupHtml.replace("{$heading_id}","grp_"+g.shortname+"_heading");
+                
+                newGroupHtml = newGroupHtml.replace("{$btn_borrar_id}","grp_"+g.shortname+"_delbtn");
+                
+                groups_container.append("<div id=\"grp_"+g.shortname+"\" class=\"hidden col-md-12 grp-details\" group-index=\""+i.toString()+"\">" + newGroupHtml + "</div>");
+                // generar listado de variables dentro de ese grupo
+                // primero las variables que están en el grupo
+                g.variables.forEach(function(v){
+                    new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname_id\}/g,g.shortname+"_"+v).replace(/\{\$shortname\}/g,v).replace(/\{\$fullname\}/g,ire.getVariables()[ire.getVariableByShortname(v)].fullname);
+                    $("#lista_grupos_con_checklist_"+g.shortname).append(new_checkbox_html);
+                    $("#variable_checkbox_"+g.shortname+"_"+v).prop("checked",true);
+                });
+                //luego el resto de variables
+                ire.getVariables().forEach(function (v,i) {
+                    
+                    if(g.variables.indexOf(v.shortname) == -1) {
+                        new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname_id\}/g,g.shortname+"_"+v.shortname).replace(/\{\$shortname\}/g,v.shortname).replace(/\{\$fullname\}/g,ire.getVariables()[ire.getVariableByShortname(v.shortname)].fullname);
+                        $("#lista_grupos_con_checklist_"+g.shortname).append(new_checkbox_html);
+                        $("#variable_checkbox_"+v.shortname).prop("checked",false);  
+                    };
+                });
+                
+                // eventos para detalles de grupo
+                
+                $("#grp_"+g.shortname+"_shortname").on("input",function(e){
+                    // chequear que nombre corto cumple requisitos
+                    normalizeShortname($(this));
+
+                    var grpPrev = ire.getGroups()[i];
+                    $("#grp_"+grpPrev.shortname).attr("id","grp_"+$(this).val());
+                    $("#grp_"+grpPrev.shortname+"_fullname").attr("id","grp_"+$(this).val()+"_fullname");
+                    $("#grp_"+grpPrev.shortname+"_shortname").attr("id","grp_"+$(this).val()+"_shortname");
+                    $("#grp_"+grpPrev.shortname+"_heading").html($(this).val());
+                    $("#grp_"+grpPrev.shortname+"_heading").attr("id","grp_"+$(this).val()+"_heading");
+                    
+                    
+                    
+                    $(select_obj.find("option")[i]).val($(this).val());
+                    $(select_obj.find("option")[i]).html(g.fullname+" ("+$(this).val()+")");
+                    console.log(grpUpdate(i,'shortname',$(this).val()));
+                    console.log(ire.getGroups());
+    
+                });
+                
+                $("#grp_"+g.shortname+"_fullname").on("input",function(e){
+                    $(select_obj.find("option")[i]).html($(this).val()+" ("+g.shortname+")");
+                    grpUpdate(i,'fullname',$(this).val());
+                });
+                
+                $("#grp_"+g.shortname+"_delbtn").on("click",function(e){
+                    ire.delGroup(i);
+                    reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,ire.getGroups()[0]);
+                });
+
                select_obj.append("<option value=\""+g.shortname+"\">"+g.fullname+" ("+g.shortname+")</option>");
-            });
+            }); // end each group
+            $("#grp_"+focusGroup.shortname).toggleClass("hidden");
+            select_obj.val(focusGroup.shortname);
             
-            select_obj.val(focusVariable.shortname);
+            
         }
     }
 
@@ -52,10 +122,7 @@ $(document).ready(function(){
             myhash[key] = newVal
             ire.updateVariable(varindex,myhash);
         };
-        
 
-        
-        
         covariables_container.html("");
         select_obj.html("");
         select_obj.val("");
@@ -80,7 +147,7 @@ $(document).ready(function(){
                 $("#var_"+v.shortname+"_shortname").on("input",function(e){
                     // chequear que nombre corto cumple requisitos
                     normalizeShortname($(this));
-                    //$(this).val($(this).val().toUpperCase().replace(' ','_'));
+
                     
                     
                     var varPrev = ire.getVariables()[i];
@@ -110,7 +177,6 @@ $(document).ready(function(){
                 });
                 
                 $("#var_"+v.shortname+"_delbtn").on("click",function(e){
-                    console.log("borrar variable"); 
                     ire.delVariable(i);
                     reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);
                 });
@@ -118,6 +184,7 @@ $(document).ready(function(){
                 //covariable select options generation
                 select_obj.append("<option value=\""+v.shortname+"\">"+v.fullname+" ("+v.shortname+")</option>");
             });
+            
             $("#var_"+focusVariable.shortname).toggleClass("hidden");
             select_obj.val(focusVariable.shortname);
         
@@ -130,6 +197,13 @@ $(document).ready(function(){
             if($(this).hasClass("hidden")==false) {$(this).addClass("hidden")};
         });
         focusVariable.toggleClass("hidden");
+    };
+    
+    showGroupDetails = function(group_container,focusGroup) {
+        $.each(group_container.find(".grp-details"),function(g){
+            if($(this).hasClass("hidden")==false) {$(this).addClass("hidden")};
+        });
+        focusGroup.toggleClass("hidden");
     };
     
     // eventos ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -169,8 +243,11 @@ $(document).ready(function(){
     })
     
     $("#listado_variables").on("change", function(e){
-        console.log(e);
         showCovariableDetails($("#variables_container"),$("#var_"+$(this).val()));
+    });
+    
+    $("#listado_grupos").on("change", function(e){
+        showGroupDetails($("#variables_group_container"),$("#grp_"+$(this).val()));
     });
     
     $("#testbtn").on("click",function(e){
@@ -183,9 +260,8 @@ $(document).ready(function(){
         $("#lista_grupos_con_checklist").html("");
         var variables = ire.getVariables();
         variables.forEach(function(v){
-            new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname\}/g,v.shortname).replace(/\{\$fullname\}/g,v.fullname);
+            new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname_id\}/g,v.shortname).replace(/\{\$shortname\}/g,v.shortname).replace(/\{\$fullname\}/g,v.fullname);
             $("#lista_grupos_con_checklist").append(new_checkbox_html);
-            
         });
         
         
@@ -240,6 +316,8 @@ $(document).ready(function(){
     });
 
     $("#subsecVariablesGrupos").on("click", function(){
+        reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,ire.getGroups()[0]);
+
         //muestra subsect variables_grupos
         $.each($(".subsect"),function(a,b){
             if($(b).hasClass("hidden")==false) {
@@ -248,9 +326,10 @@ $(document).ready(function(){
         });
 
         $("#group_selector").toggleClass("hidden");
-        $("#variables_groups_container").toggleClass("hidden");
+        $("#variables_group_container").toggleClass("hidden");
+
         
-        reloadGroups($("#listado_grupos"), $("#variabrles_group_container"),ire,ire.getGroups()[0]);
+        
     });
 
     reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);  
