@@ -192,6 +192,38 @@ $(document).ready(function(){
         
     };
     
+    reloadRelations = function(ire) {
+        $("#listado_relaciones_a").html("");
+        $("#listado_relaciones_b").html("");
+        ire.getVariables().forEach(function(v,index){
+           $("#listado_relaciones_a").append("<option value=\""+v.shortname+"\">("+v.shortname+") "+v.fullname+"</option>"); 
+           $("#listado_relaciones_b").append("<option value=\""+v.shortname+"\">("+v.shortname+") "+v.fullname+"</option>"); 
+        });
+        
+        ire.getGroups().forEach(function(v,index){
+           $("#listado_relaciones_a").append("<option value=\""+v.shortname+"\">("+v.shortname+") "+v.fullname+"</option>"); 
+           $("#listado_relaciones_b").append("<option value=\""+v.shortname+"\">("+v.shortname+") "+v.fullname+"</option>"); 
+        });
+        
+        $("#variables_relaciones_container").html("");
+        ire.getRelations().forEach(function(r,i){
+            var html = 
+                    "<div class=\"row\">"+
+                        "<div class=\"col-md-2\"><button id=\"btndel_"+r.vara+"_"+r.varb+"\" class=\"btn btn-default\">Borrar</button></div>"+
+                        "<div class=\"col-md-2\">"+r.vara+"</div>"+
+                        "<div class=\"col-md-3\"> relacionado con </div>"+
+                        "<div class=\"col-md-5\">"+r.varb+"</div>"+
+                    "</div>";
+            $("#variables_relaciones_container").append(html);
+            $("#btndel_"+r.vara+"_"+r.varb).on("click",function(e){
+                ire.removeRelation(r.vara,r.varb);
+                self.reloadRelations(ire);
+            });
+               
+        });
+        
+    }
+    
     showCovariableDetails = function(covariables_container,focusVariable) {
         $.each(covariables_container.find(".covariable-details"),function(){
             if($(this).hasClass("hidden")==false) {$(this).addClass("hidden")};
@@ -240,7 +272,12 @@ $(document).ready(function(){
         reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,newGroup);
 
         resetModal($("#"+$(this).attr("modal-ref")));
-    })
+    });
+    
+    $("#btn_nueva_relacion").on("click", function(e){
+        ire.newRelation({'vara': $("#listado_relaciones_a").val(),'varb': $("#listado_relaciones_b").val()});
+        self.reloadRelations(ire);
+    });
     
     $("#listado_variables").on("change", function(e){
         showCovariableDetails($("#variables_container"),$("#var_"+$(this).val()));
@@ -252,6 +289,7 @@ $(document).ready(function(){
     
     $("#testbtn").on("click",function(e){
         e.preventDefault();
+        console.log(ire);
     });
     
     $("#btn_nuevo_grupo_launcher").on("click", function(e){
@@ -276,18 +314,76 @@ $(document).ready(function(){
     });
 
     $("#subsecVariablesResumen").on("click",function(){
-        $("#variables_resumen_container").html("");
-        ire.getVariables().forEach(function(variable,index){
-            $("#variables_resumen_container").append("<div><strong>"+variable.shortname+"</strong> <em>"+variable.fullname+"</em> "+variable.type+"</div>");
-        });
         
-        ire.getGroups().forEach(function(group,index){
-            $("#variables_resumen_container").append("<div><strong>"+group.shortname+"</strong> <em>"+group.fullname+"</em> Compuesto por: ");
-            group.variables.forEach(function(variable,index){
-                $("#variables_resumen_container").append(variable+" ");
+        genVariablesHtml = function(ire) {
+            var html = "";
+            html = html +
+                "<h2>Variables</h2>"+
+                "<table class=\"table table-striped table-condensed\">"+
+                "<theader>"+
+                    "<tr><th>Lista de variables</th></tr>"+
+                    "<tr><th>Nombre corto</th><th>Nombre completo</th><th>Tipo</th></tr>"+
+                "</theader>"+
+                "<tbody>";
+            ire.getVariables().forEach(function(v,i){
+                html = html + 
+                    "<tr><td>"+v.shortname+"</td><td>"+v.fullname+"</td><td>"+v.type+"</td></tr>"
             });
-            $("#variables_resumen_container").append("</div>");
-        });
+            html = html +
+            "</tbody>"+
+            "</table>";
+            return html;
+        };
+        genGroupsHtml = function(ire) {
+          var html = "";
+          html = html +
+              "<h2>Grupos</h2>"+
+              "<table class=\"table table-striped table-condensed\">"+
+              "<theader>"+
+                  "<tr><th>Lista de variables agrupadas</th></tr>"+
+                  "<tr><th>Nombre corto</th><th>Nombre completo</th></tr>"+
+              "</theader>"+
+              "<tbody>";
+          ire.getGroups().forEach(function(g,i){
+              html = html + 
+                  "<tr class=\"info\"><td>"+g.shortname+"</td><td>"+g.fullname+"</td></tr>";
+              g.variables.forEach(function(shortname,i){
+                  v = ire.getVariables()[ire.getVariableByShortname(shortname)];
+                  html = html + 
+                    "<tr><td></td><td><em>("+v.shortname+") "+g.fullname+"</em></td></tr>";
+              });
+          });
+          html = html +
+          "</tbody>"+
+          "</table>";
+          return html;  
+        };
+        genRelationsHtml = function(ire) {
+            var html = "";
+              html = html +
+                  "<h2>Relaciones</h2>"+
+                  "<table class=\"table table-striped table-condensed\" style=\"width: 300px\">"+
+                  "<theader>"+
+                      "<tr><th colspan=\"3\">Relaciones a analizar</th></tr>"+
+                  "</theader>"+
+                  "<tbody>";
+              ire.getRelations().forEach(function(r,i){
+                  html = html + 
+                      "<tr><td style=\"width: 100px\">"+r.vara+"</td><td style=\"width: 100px\"><---></td><td style=\"width: 100px\">"+r.varb+"</td></tr>";
+              });
+              html = html +
+              "</tbody>"+
+              "</table>";
+              return html;  
+        };
+        
+        
+        c = $("#variables_resumen_container");
+        c.html("");
+        c.append(genVariablesHtml(ire));    
+        c.append(genGroupsHtml(ire));
+        c.append(genRelationsHtml(ire));
+
         
         
         // muestra subsect variables_resumen
@@ -328,10 +424,24 @@ $(document).ready(function(){
         $("#group_selector").toggleClass("hidden");
         $("#variables_group_container").toggleClass("hidden");
 
+    });
+    
+    $("#subsecVariablesRelaciones").on("click", function(){
+
+        self.reloadRelations(ire);
+        //muestra subsect variables_grupos
+        $.each($(".subsect"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
         
-        
+        $("#relation_selector").toggleClass("hidden");
+        $("#variables_relaciones_container").toggleClass("hidden");
     });
 
     reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);  
+    reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,ire.getGroups()[0]);
+    reloadRelations(ire);
     
 });

@@ -58,7 +58,7 @@
                         <ul class="nav nav-slidebar">
                           <li id="subsecVariablesVariables" class="active"><a class="button" href="#">Variables</a></li>
                           <li><a id="subsecVariablesGrupos" class="button" href="#">Grupos</a></li>
-                          <li><a class="button" href="#">Relaciones</a></li>
+                          <li><a id="subsecVariablesRelaciones" class="button" href="#">Relaciones</a></li>
                           <li><a id="subsecVariablesResumen" class="button" href="#">Resumen</a></li>
                           
                         </ul>
@@ -69,25 +69,49 @@
                             <h3>Listado de variables <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nueva variable</button>  </h3>
                             <select id="listado_variables" class="form-control"></select>
                         </div>
-                        
-                        
-                        <div id="variables_container" class="row subsect">
 
-                        </div>
+                        <div id="variables_container" class="row subsect"></div>
                         
                         <div id="group_selector" class="row subsect hidden">
                             <h3>Listado de grupos <button id="btn_nuevo_grupo_launcher" class="btn btn-default">Nuevo grupo</button></h3>
-
                             <select id="listado_grupos" class="form-control"></select>
                         </div>
                         
-                        <div id="variables_group_container" class="row hidden subsect">
-                            
+                        <div id="variables_group_container" class="row hidden subsect"></div>
+                        
+                        
+                        <div id="relation_selector" class="row subsect hidden">
+                            <h3>Relaciones entre variables a analizar</h3>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <select id="listado_relaciones_a" class="form-control"></select>
+                                </div>
+                                <div class="col-md-5">
+                                    <select id="listado_relaciones_b" class="form-control"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button id="btn_nueva_relacion" class="btn btn-default">Nueva relación</button>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div id="variables_resumen_container" class="row hidden subsect">
+                        <div id="variables_relaciones_container" class="row hidden subsect"></div>
+                        
+                        <div id="relation_row_template" class="hidden">
                             
+                                <div class="row">
+                                    <div class="col-md-1"><button id="rel_delbtn_{$shortname_a}_{$shortname_b}" class="btn btn-default">Borrar</button></div>
+                                    <div class="col-md-11">
+                                        <span id="rel_{$shortname_a}_{$shortname_b}_v_{$shortname_a}">{$shortname_a}</span> con 
+                                        <span id="rel_{$shortname_a}_{$shortname_b}_v_{$shortname_b}" >{$shortname_b}</span>                  
+                                    </div>
+                                    
+                                    
+                        
+                                </div>
                         </div>
+                        
+                        <div id="variables_resumen_container" class="row hidden subsect"></div>
                         
                         <div id="covariable_template" class="hidden">
                             <div class="panel panel-default">
@@ -202,8 +226,7 @@
                         </div>
                         <div class="col-md-8">{$fullname}</div>
                     </div>
-                
-                </div>
+            </div>
             <!-- fin de template para la lista de variables de modal_nuevo_grupo-->
             
         </div>

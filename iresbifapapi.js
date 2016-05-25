@@ -6,28 +6,63 @@ BIFAP.ire = function () {
     self.groups = [];
     
     //for testing
-    self.variables = [{'shortname':'VARIABLE_A', 
-                     'fullname': 'variable a completa',
+    self.variables = [{'shortname':'HTA', 
+                     'fullname': 'Hipertensión arterial',
                      'type': 'diagnostico'
                      },
-                     {'shortname':'VARIABLE_B', 
-                     'fullname': 'variable b completa',
+                     {'shortname':'DM2', 
+                     'fullname': 'Diabetes mellitus no insulinodependiente',
+                     'type': 'diagnostico'
+                     },
+                     {'shortname':'IBUPROFENO', 
+                     'fullname': 'Ibuprofeno',
                      'type': 'farmaco'
                      },
-                     {'shortname':'VARIABLE_C', 
-                     'fullname': 'variable c completa',
+                     {'shortname':'PARACETAMOL', 
+                     'fullname': 'Paracetamol',
                      'type': 'farmaco'
                      }
                     ];
                     
-    self.groups = [{'shortname':'GROUP_A',
-                    'fullname':'Grupo A completo',
-                    'variables': ["VARIABLE_A","VARIABLE_B"]
+    self.groups = [{'shortname':'RCV',
+                    'fullname':'Enfermedad que aumenta el riesgo cardiovascular',
+                    'variables': ["HTA","DM2"]
                     },
-                    {'shortname':'GROUP_B',
-                    'fullname':'Grupo B completo',
-                    'variables': ["VARIABLE_B","VARIABLE_C"]
+                    {'shortname':'ANALGESICO',
+                    'fullname':'Fármacos analgésicos',
+                    'variables': ["IBUPROFENO","PARACETAMOL"]
                     }];
+                    
+    self.relations = [
+                        {
+                            'shortname': 'HTA_DM2',
+                            'vara': 'HTA',
+                            'varb': 'DM2'
+                        },
+                        {
+                            'shortname': 'HTA_IBUPROFENO',
+                            'vara': 'HTA',
+                            'varb': 'IBUPROFENO'
+                        },
+                        {
+                            'shortname': 'HTA_PARACETAMOL',
+                            'vara': 'HTA',
+                            'varb': 'PARACETAMOL'
+                        },
+                        {
+                            'shortname': 'RCV_IBUPROFENO',
+                            'vara': 'RCV',
+                            'varb': 'IBUPROFENO'
+                        },
+                        {
+                            'shortname': 'RCV_ANALGESICO',
+                            'vara': 'RCV',
+                            'varb': 'ANALGESICO'
+                        }
+                    ]
+    self.getRelations = function() {
+        return self.relations;
+    }
     
     self.shortnameExists = function(shortname) {
         if(self.getVariableByShortname(shortname) < 0 && self.getGroupByShortname(shortname) < 0) {
@@ -60,6 +95,28 @@ BIFAP.ire = function () {
                             'type': varparams.type || ''
                             });
         }
+    }
+    
+    self.newRelation = function(varparams = {'vara': '', 'varb': ''}) {
+        if(self.shortnameExists(varparams.vara) && self.shortnameExists(varparams.varb) && self.relationExists(varparams.vara, varparams.varb) == false && varparams.vara != varparams.varb) {
+            self.relations.push({
+                                    'vara': varparams.vara,
+                                    'varb': varparams.varb,
+                                    'shortname': varparams.vara + "_" + varparams.varb
+                                });
+        }
+    }
+    
+    self.relationExists = function(vara = '', varb = '') {
+        result = false;
+        self.getRelations().forEach(function(r,i){
+            if(     ((r.vara == vara) && (r.varb == varb)) || 
+                    ((r.varb == vara) && (r.vara == varb))    
+                ){ 
+                    result = true;
+                }
+        });
+        return result;
     }
     
     self.getGroups = function () {
@@ -121,7 +178,7 @@ BIFAP.ire = function () {
                 var oldVar = self.variables[index][j];
                 self.variables[index][j] = updatedVariable[j];
                 if(j == "shortname") {
-                    self.updateGroupVariablesShortname(oldVar,updatedVariable[j]);   
+                    self.updateOverallShortname(oldVar,updatedVariable[j]);   
                 }
                 
             });
@@ -129,26 +186,64 @@ BIFAP.ire = function () {
         }
     }
     
-    self.updateGroupVariablesShortname = function (oldShortname,newShortname) {
+    self.updateOverallShortname = function (oldShortname,newShortname) {
         self.getGroups().forEach(function(g,i){
            self.removeVariableFromGroup(i, oldShortname);
            self.addVariableToGroup(i, newShortname);
         });
+        self.getRelations().forEach(function(r,i){
+            if(r.vara == oldShortname) {
+                r.vara = newShortname;
+            }
+            if(r.varb == oldShortname) {
+                r.varb = newShortname;
+            }
+            
+        });
+    }
+    
+    self.removeRelation = function(vara,varb = "") {
+        var array_to_remove = [];
+        self.getRelations().forEach(function(r,i){
+            
+            if(
+                (r.vara == vara && r.varb == varb) || 
+                (r.vara == varb && r.varb == vara) || 
+                (varb == "" && (r.vara == vara || r.varb == vara))
+                ) {
+                    console.log(vara,varb," removes: ",r.vara, r.varb);
+                    array_to_remove.push(i);
+            }
+        });
+        array_to_revomve = array_to_remove.reverse();
+        array_to_remove.forEach(function(index){
+            console.log(index);
+            console.log(self.relations[index]);
+           self.relations.splice(index,1); 
+        });
+        
+        return self.relations;
     }
     
     self.delVariable = function(index) {
         self.getGroups().forEach(function(g,i){
             self.removeVariableFromGroup(i, self.variables[index].shortname);
         });
+        self.removeRelation(self.variables[index].shortname);
         self.variables.splice(index,1);
     }
     
     self.delGroup = function(index) {
+        self.removeRelation(self.groups[index].shortname);
         self.groups.splice(index,1);
+        
     }
     
     self.addVariableToGroup = function(group_index, variable) {
         if(group_index >= 0) {
+            console.log("Group index: " + group_index.toString());
+            console.log(self.groups);
+            console.log(self.groups[group_index]);
             var i = self.groups[group_index].variables.indexOf(variable);
             
             if (i < 0 && self.shortnameExists(variable)) {
