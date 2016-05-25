@@ -377,15 +377,45 @@ $(document).ready(function(){
               return html;  
         };
         
+        genResumenTextareaHtml = function(ire) {
+
+            var html = "<h3>Texto plano para copiar <button class=\"btn btn-default btn-lg\"id=\"resumen_copy\"><span class=\"glyphicon glyphicon-copy\" aria-hidden=\"true\"></span></button></h3>" + 
+                        "<textarea class=\"form-control\" id=\"resumen_textarea\">"
+            
+            var t = "";
+            
+            t = t + "Lista de variables:\n";
+            ire.getVariables().forEach(function(v){
+                t = t + v.shortname + "\t" + v.fullname + "\t" + v.type +"\n";
+            });
+            t = t + "\nLista de grupos:\n";
+            ire.getGroups().forEach(function(g){
+                t = t + g.shortname + "\t" + g.fullname + "\n"  
+                g.variables.forEach(function(shortname){
+                    t = t + g.shortname + "\t" + shortname + "\n";
+                });
+                t = t + "\n";
+            });
+            t = t + "\nLista de relaciones:\n";
+            ire.getRelations().forEach(function(r){
+                t = t + r.vara + "\t" + r.varb +"\n";
+            });
+            //html = html + t + "</textarea>";
+            html = html + t + "</textarea>";
+            
+            return html;
+            
+        }
+        
         
         c = $("#variables_resumen_container");
         c.html("");
         c.append(genVariablesHtml(ire));    
         c.append(genGroupsHtml(ire));
         c.append(genRelationsHtml(ire));
+        c.append(genResumenTextareaHtml(ire));
+        
 
-        
-        
         // muestra subsect variables_resumen
         $.each($(".subsect"),function(a,b){
             if($(b).hasClass("hidden")==false) {
@@ -394,6 +424,12 @@ $(document).ready(function(){
         });
         
         $("#variables_resumen_container").toggleClass("hidden");
+        //$("#resumen_textarea").focus().select();
+        $("#resumen_copy").on("click",function(e){
+            $("#resumen_textarea").focus().select();
+            document.execCommand("copy");
+            alert("Resumen copiado al portapapeles, listo para pegar!");
+        });
 
     });
     
