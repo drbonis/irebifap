@@ -1,0 +1,238 @@
+<html>
+    <head>
+       <meta charset="UTF-8">
+       <style>
+           .body {width: 90%;}
+       </style>
+       <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+       <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+       
+
+       
+       <!-- Latest compiled and minified CSS -->
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+       
+       <!-- Optional theme -->
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+       
+       <!-- Latest compiled and minified JavaScript -->
+       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+       
+       <link rel ="stylesheet" href="./iresbifap.css">
+    </head>
+    
+    
+    <body>
+        
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="navbar navbar-default navbar-fixed-top">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                              <span class="sr-only">Toggle navigation</span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="#">Generador de Informes Unidad de Atención al Colaborador BIFAP</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav navbar-right">
+                              <li><a href="#">Variables</a></li>
+                              <li><a href="#">Tablas</a></li>
+                              <li><a href="#">Gráficos</a></li>
+                              <li><a href="#">Resultado</a></li>
+                              <li><a id="testbtn" href="#">TestButton</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+                </nav>
+            </div>
+            <div id="pantalla_variables" class="row">
+
+                    <div class="col-md-2">
+
+                        <ul class="nav nav-slidebar">
+                          <li id="subsecVariablesVariables" class="active"><a class="button" href="#">Variables</a></li>
+                          <li><a id="subsecVariablesGrupos" class="button" href="#">Grupos</a></li>
+                          <li><a id="subsecVariablesRelaciones" class="button" href="#">Relaciones</a></li>
+                          <li><a id="subsecVariablesResumen" class="button" href="#">Resumen</a></li>
+                          
+                        </ul>
+                    </div>
+                    <div id="pantalla_variables_variables" class="col-md-10">
+                        
+                        <div id="var_selector" class="row subsect">
+                            <h3>Listado de variables <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nueva variable</button>  </h3>
+                            <select id="listado_variables" class="form-control"></select>
+                        </div>
+
+                        <div id="variables_container" class="row subsect"></div>
+                        
+                        <div id="group_selector" class="row subsect hidden">
+                            <h3>Listado de grupos <button id="btn_nuevo_grupo_launcher" class="btn btn-default">Nuevo grupo</button></h3>
+                            <select id="listado_grupos" class="form-control"></select>
+                        </div>
+                        
+                        <div id="variables_group_container" class="row hidden subsect"></div>
+                        
+                        
+                        <div id="relation_selector" class="row subsect hidden">
+                            <h3>Relaciones entre variables a analizar</h3>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <select id="listado_relaciones_a" class="form-control"></select>
+                                </div>
+                                <div class="col-md-5">
+                                    <select id="listado_relaciones_b" class="form-control"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button id="btn_nueva_relacion" class="btn btn-default">Nueva relación</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="variables_relaciones_container" class="row hidden subsect"></div>
+                        
+                        <div id="relation_row_template" class="hidden">
+                            
+                                <div class="row">
+                                    <div class="col-md-1"><button id="rel_delbtn_{$shortname_a}_{$shortname_b}" class="btn btn-default">Borrar</button></div>
+                                    <div class="col-md-11">
+                                        <span id="rel_{$shortname_a}_{$shortname_b}_v_{$shortname_a}">{$shortname_a}</span> con 
+                                        <span id="rel_{$shortname_a}_{$shortname_b}_v_{$shortname_b}" >{$shortname_b}</span>                  
+                                    </div>
+                                    
+                                    
+                        
+                                </div>
+                        </div>
+                        
+                        <div id="variables_resumen_container" class="row hidden subsect"></div>
+                        
+                        <div id="covariable_template" class="hidden">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 id="{$heading_id}" class="panel-title">{$nombre_corto}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div>Nombre corto: <input id="{$nombre_corto_id}" class="form-control var-shortname-input" value="{$nombre_corto}"/></div>
+                                    <div>Nombre completo: <input id="{$nombre_completo_id}" class="form-control var-fullname-input" value="{$nombre_completo}"/></div>
+                                    <div>Tipo de variable: 
+                                        <select id="{$tipo_id}" class="form-control var-type-select">
+                                            <option selected value="diagnostico">Diagnóstico</option>
+                                            <option value="farmaco">Fármaco</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="panel-footer">
+                                    <div><button id="{$btn_borrar_id}" class="btn btn-danger">Borrar</button></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="group_template" class="hidden">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 id="{$heading_id}" class="panel-title">{$nombre_corto}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div>Nombre corto: <input id="{$nombre_corto_id}" class="form-control var-shortname-input" value="{$nombre_corto}"/></div>
+                                    <div>Nombre completo: <input id="{$nombre_completo_id}" class="form-control var-fullname-input" value="{$nombre_completo}"/></div>
+                                    <div>Variables que componen el grupo: 
+                                        <div id="lista_grupos_con_checklist_{$nombre_corto}">
+                                            <!-- aqui se inserta el variable_checklist_row_template -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel-footer">
+                                    <div><button id="{$btn_borrar_id}" class="btn btn-danger">Borrar</button></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                    </div>
+                </div>
+
+        </div>    
+
+        <div id="modalsContainer">
+            <div id="modal_nueva_variable" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Nueva variable</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div>
+                                <label for="new_variable_shortname">Nombre corto:</label>
+                                <input class="form-control" id="new_variable_shortname" type="text" maxlength="16"></input>
+                                <label for="new_variable_fullname">Nombre completo:</label>
+                                <input class="form-control" id="new_variable_fullname" type="text"></input>
+                                <label for="new_variable_type">Tipo de variable:</label>
+                                <select id="new_variable_type" class="form-control">
+                                    <option selected value="diagnostico">Diagnóstico</option>
+                                    <option value="farmaco">Fármaco</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" modal-ref="modal_nueva_variable">Cancelar</button>
+                            <button id="btn_nueva_variable" type="button" class="btn btn-primary" modal-ref="modal_nueva_variable">Crear</button>
+                        </div>
+                        </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal_nueva_variable -->
+            
+            <div id="modal_nuevo_grupo" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Nuevo grupo</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div>
+                                <label for="new_group_shortname">Nombre corto:</label>
+                                <input class="form-control" id="new_group_shortname" type="text" maxlength="16"></input>
+                                <label for="new_group_fullname">Nombre completo:</label>
+                                <input class="form-control" id="new_group_fullname" type="text"></input>
+                                <strong>Variables que componen el grupo:</strong>
+                                <div id="lista_grupos_con_checklist">
+                                    
+                                    <!-- aqui se inserta el variable_checklist_row_template -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" modal-ref="modal_nuevo_grupo">Cancelar</button>
+                            <button id="btn_nuevo_grupo" type="button" class="btn btn-primary" modal-ref="modal_nuevo_grupo">Crear</button>
+                        </div>
+                        </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal_nuevo_grupo-->
+            
+            <!-- este div no se muestra nunca, es un template para la lista de variables de modal_nuevo_grupo-->
+            <div id="variable_checklist_row_template" class="hidden">
+                
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="checkbox-inline"><input type="checkbox" id="variable_checkbox_{$shortname_id}" value="{$shortname}" class="variable-de-grupo">{$shortname}</label>
+                        </div>
+                        <div class="col-md-8">{$fullname}</div>
+                    </div>
+            </div>
+            <!-- fin de template para la lista de variables de modal_nuevo_grupo-->
+            
+        </div>
+
+    </body>
+    <script src="iresbifap_2.js"></script>
+    <script src="iresbifapweb.js"></script>
+    <script src="iresbifapapi.js"></script>
+</html>
