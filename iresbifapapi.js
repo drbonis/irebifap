@@ -72,7 +72,8 @@ BIFAP.ire = function () {
         }
     }
     
-    self.newGroup = function(varparams = {'shortname': '', 'fullname': '', 'variables': []}) {
+    self.newGroup = function(varparams) {
+        varparams = varparams || {'shortname': '', 'fullname': '', 'variables': []};
         //pendiente de incluir que todas las variables del grupo existen y 
         //que shortname es único tanto en variables como groups
         if(self.shortnameExists(varparams.shortname) == false) {
@@ -87,7 +88,8 @@ BIFAP.ire = function () {
     
 
     
-    self.newVariable = function(varparams = {'shortname': '', 'fullname': '', 'type': ''}) {
+    self.newVariable = function(varparams) {
+        varparams = varparams || {'shortname': '', 'fullname': '', 'type': ''};
         //pendiente de incluir check de que shortname es único tanto en variables como groups
         if(self.shortnameExists(varparams.shortname) == false) {
             self.variables.push({'shortname': varparams.shortname || '', 
@@ -97,7 +99,8 @@ BIFAP.ire = function () {
         }
     }
     
-    self.newRelation = function(varparams = {'vara': '', 'varb': ''}) {
+    self.newRelation = function(varparams) {
+        varparams = varparams || {'vara': '', 'varb': ''};
         if(self.shortnameExists(varparams.vara) && self.shortnameExists(varparams.varb) && self.relationExists(varparams.vara, varparams.varb) == false && varparams.vara != varparams.varb) {
             self.relations.push({
                                     'vara': varparams.vara,
@@ -107,7 +110,9 @@ BIFAP.ire = function () {
         }
     }
     
-    self.relationExists = function(vara = '', varb = '') {
+    self.relationExists = function(vara,  varb) {
+        vara = vara || '';
+        varb = varb || '';
         result = false;
         self.getRelations().forEach(function(r,i){
             if(     ((r.vara == vara) && (r.varb == varb)) || 
@@ -153,7 +158,8 @@ BIFAP.ire = function () {
         return self.getElementByShortname(variables,shortname);
     }
     
-    self.updateGroup = function(index,updatedGroup = {}) {
+    self.updateGroup = function(index,updatedGroup) {
+        updatedGroup = updatedGroup || {};
         updated_keys = Object.keys(updatedGroup);
         if(updated_keys.indexOf("shortname") >= 0 && self.shortnameExists(updatedGroup.shortname)) {
             // update contiene shortname que ya existe
@@ -166,7 +172,8 @@ BIFAP.ire = function () {
         }
     }
     
-    self.updateVariable = function(index,updatedVariable = {}) {
+    self.updateVariable = function(index,updatedVariable) {
+        updatedVariable = updatedVariable || {};
         updated_keys = Object.keys(updatedVariable);
         if(updated_keys.indexOf("shortname") >= 0 && self.shortnameExists(updatedVariable.shortname)) {
             // update contiene shortname que ya existe
@@ -202,7 +209,8 @@ BIFAP.ire = function () {
         });
     }
     
-    self.removeRelation = function(vara,varb = "") {
+    self.removeRelation = function(vara,varb) {
+        varb = varb || "";
         var array_to_remove = [];
         self.getRelations().forEach(function(r,i){
             

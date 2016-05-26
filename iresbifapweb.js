@@ -69,7 +69,16 @@ $(document).ready(function(){
                     if(g.variables.indexOf(v.shortname) == -1) {
                         new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname_id\}/g,g.shortname+"_"+v.shortname).replace(/\{\$shortname\}/g,v.shortname).replace(/\{\$fullname\}/g,ire.getVariables()[ire.getVariableByShortname(v.shortname)].fullname);
                         $("#lista_grupos_con_checklist_"+g.shortname).append(new_checkbox_html);
-                        $("#variable_checkbox_"+v.shortname).prop("checked",false);  
+                        $("#variable_checkbox_"+g.shortname+"_"+v.shortname).prop("checked",false);  
+                        console.log($("#variable_checkbox_"+g.shortname+"_"+v.shortname));
+                        $("#variable_checkbox_"+g.shortname+"_"+v.shortname).on("click",function(){
+                            if($(this).prop("checked")){
+                                ire.addVariableToGroup(ire.getGroupByShortname(g.shortname),v.shortname);
+                                
+                            } else {
+                                ire.removeVariableFromGroup(ire.getGroupByShortname(g.shortname),v.shortname);
+                            };
+                        });
                     };
                 });
                 
@@ -431,6 +440,30 @@ $(document).ready(function(){
             alert("Resumen copiado al portapapeles, listo para pegar!");
         });
 
+    });
+    
+    $("#secTablas").on("click",function(){
+        
+        $.each($(".section"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
+
+        $("#pantalla_tablas").toggleClass("hidden");
+        $("#subsecTablasXXXX").click();
+    })
+    
+    $("#secVariables").on("click",function(){
+        
+        $.each($(".section"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
+
+        $("#pantalla_variables").toggleClass("hidden");
+        $("#subsecVariablesVariables").click();
     });
     
     $("#subsecVariablesVariables").on("click",function(){

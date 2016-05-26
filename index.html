@@ -39,8 +39,8 @@
                         </div>
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
-                              <li><a href="#">Variables</a></li>
-                              <li><a href="#">Tablas</a></li>
+                              <li id="secVariables"><a href="#">Variables</a></li>
+                              <li id="secTablas"><a href="#">Tablas</a></li>
                               <li><a href="#">Gráficos</a></li>
                               <li><a href="#">Resultado</a></li>
                               <li><a id="testbtn" href="#">TestButton</a></li>
@@ -51,7 +51,7 @@
 
                 </nav>
             </div>
-            <div id="pantalla_variables" class="row">
+            <div id="pantalla_variables" class="row section">
 
                     <div class="col-md-2">
 
@@ -157,6 +157,56 @@
 
                     </div>
                 </div>
+                
+                
+                
+                
+                <div id="pantalla_tablas" class="row section">
+
+                    <div class="col-md-2">
+
+                        <ul class="nav nav-slidebar">
+                          <li id="subsecTablasVariables" class="active"><a class="button" href="#">Variables</a></li>
+                          
+                          
+                        </ul>
+                    </div>
+                    <div id="pantalla_tablas_variables" class="col-md-10">
+                        
+                        <div id="var_selector" class="row subsect">
+                            <h3>Listado de variables <button id="btn_nueva_variable_launcher" class="btn btn-default" data-toggle="modal" data-target="#modal_nueva_variable">Nueva variable</button>  </h3>
+                            <select id="listado_variables" class="form-control"></select>
+                        </div>
+
+                        <div id="variables_container" class="row subsect"></div>
+                        
+                        
+                        
+
+                        
+
+                        
+
+                        
+
+                        
+
+                    </div>
+                </div>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
 
         </div>    
 
@@ -233,6 +283,7 @@
 
     </body>
     <script src="iresbifap_2.js"></script>
-    <script src="iresbifapweb.js"></script>
     <script src="iresbifapapi.js"></script>
+    <script src="iresbifapweb.js"></script>
+    
 </html>
