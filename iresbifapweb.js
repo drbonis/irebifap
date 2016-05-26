@@ -6,7 +6,7 @@ $(document).ready(function(){
         e.preventDefault();
     });
     
-    
+
 
     normalizeShortname = function(dom_element) {
         if(dom_element.val().length > 16) {
@@ -70,7 +70,6 @@ $(document).ready(function(){
                         new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname_id\}/g,g.shortname+"_"+v.shortname).replace(/\{\$shortname\}/g,v.shortname).replace(/\{\$fullname\}/g,ire.getVariables()[ire.getVariableByShortname(v.shortname)].fullname);
                         $("#lista_grupos_con_checklist_"+g.shortname).append(new_checkbox_html);
                         $("#variable_checkbox_"+g.shortname+"_"+v.shortname).prop("checked",false);  
-                        console.log($("#variable_checkbox_"+g.shortname+"_"+v.shortname));
                         $("#variable_checkbox_"+g.shortname+"_"+v.shortname).on("click",function(){
                             if($(this).prop("checked")){
                                 ire.addVariableToGroup(ire.getGroupByShortname(g.shortname),v.shortname);
@@ -296,10 +295,7 @@ $(document).ready(function(){
         showGroupDetails($("#variables_group_container"),$("#grp_"+$(this).val()));
     });
     
-    $("#testbtn").on("click",function(e){
-        e.preventDefault();
-        console.log(ire);
-    });
+
     
     $("#btn_nuevo_grupo_launcher").on("click", function(e){
         e.preventDefault();
@@ -508,9 +504,23 @@ $(document).ready(function(){
         $("#relation_selector").toggleClass("hidden");
         $("#variables_relaciones_container").toggleClass("hidden");
     });
+    
+    
+    $("#testbtn").on("click",function(e){
+        e.preventDefault();
+        
+        console.log(ire.generateRandomDatasetBase(100000));
+        ire.addRandomVarToDataset("HTA");
+        ire.addRandomVarToDataset("DIABETES");
+        console.log(ire.summarizeVarDataset("HTA"));
+        console.log(ire.summarizeVarDataset("DIABETES"));
+        console.log(ire.summarizeVarDataset("yearnac"));
+        console.log(ire.contingencyTabVarDataset("HTA","DIABETES"));
+    });
 
     reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);  
     reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,ire.getGroups()[0]);
     reloadRelations(ire);
+    $("#secVariables").click();
     
 });

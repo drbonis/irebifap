@@ -60,6 +60,155 @@ BIFAP.ire = function () {
                             'varb': 'ANALGESICO'
                         }
                     ]
+                    
+        self.dataset = {};
+    
+    
+    self.summarizeVarDataset = function(varshortname) {
+        function add(a,b) { return a+b };
+        var sum = self.dataset[varshortname].reduce(add, 0);
+        var count = self.dataset[varshortname].length;
+        var mean = sum / count;
+        return {'shortname': varshortname, 'sum': sum, 'count': count, 'mean': mean}
+    }
+    
+    self.contingencyTabVarDataset = function(vara, varb) {
+        var cell_a = 0;
+        var cell_b = 0;
+        var cell_c = 0;
+        var cell_d = 0;
+        self.dataset[vara].forEach(function(vara,index){
+            if(vara == 0) {
+                if(self.dataset[varb][index] == 0) {
+                    cell_a = cell_a + 1;   
+                } else {
+                    cell_b = cell_b + 1;
+                }
+            } else {
+                if(self.dataset[varb][index] == 0) {
+                    cell_c = cell_c + 1;
+                } else {
+                    cell_d = cell_d + 1;
+                }
+            }
+        });
+        return [cell_a, cell_b, cell_c, cell_d, eval((cell_a * cell_d) / (cell_b * cell_c))];
+    }
+    
+    self.addRandomVarToDataset = function(shortname, distribution) {
+        var distribution = distribution || {'M': {
+                                                    0: 0.1,
+                                                    10: 0.1,
+                                                    20: 0.1,
+                                                    30: 0.1,
+                                                    40: 0.1,
+                                                    50: 0.1,
+                                                    60: 0.1,
+                                                    70: 0.1,
+                                                    80: 0.1,
+                                                    90: 0.1,
+                                                    100: 0.1
+                                                    }, 
+                                            'F': {
+                                                      0: 0.1,
+                                                      10: 0.1,
+                                                      20: 0.1,
+                                                      30: 0.1,
+                                                      40: 0.1,
+                                                      50: 0.1,
+                                                      60: 0.1,
+                                                      70: 0.1,
+                                                      80: 0.1,
+                                                      90: 0.1,
+                                                      100: 0.1
+                                                      }
+                                            };
+                                            
+        self.dataset[shortname] = [];                                    
+        self.dataset.id.forEach(function(index){
+            var age = 2016 - self.dataset.yearnac[index];
+            var sex = self.dataset.sex[index];
+            var probVarForAgeSex = 0;
+            var flag = 0;
+            Object.keys(distribution[self.dataset.sex[index]]).forEach(function(key, index){
+                if(parseInt(key) > age){
+                   if(flag == 0) {
+                    probVarForAgeSex = distribution[sex][parseInt(key)];
+                   }
+                   flag = 1;
+                };
+            });
+            if(Math.random() <= probVarForAgeSex) {
+                self.dataset[shortname].push(1);
+            } else {
+                self.dataset[shortname].push(0);
+            };
+            
+        });
+        return self.dataset;
+    }
+        
+    self.generateRandomDatasetBase = function(size) {
+        var i = 0;
+        self.dataset = {'id': [], 'yearnac': [], 'sex': []};
+        var piramide = [
+                        {'sex': 'M', 'minage': 0, 'maxage': 9, 'percentage':0.052528185737830156 },
+                        {'sex': 'M', 'minage': 10, 'maxage': 19, 'percentage': 0.04891836669848686},
+                        {'sex': 'M', 'minage': 20, 'maxage': 29, 'percentage': 0.050074669238069844},
+                        {'sex': 'M', 'minage': 30, 'maxage': 39, 'percentage': 0.07762285196426376},
+                        {'sex': 'M', 'minage': 40, 'maxage': 49, 'percentage':0.08287801906172335 },
+                        {'sex': 'M', 'minage': 50, 'maxage': 59, 'percentage': 0.06934361526208833},
+                        {'sex': 'M', 'minage': 60, 'maxage': 69, 'percentage': 0.05265251934423693},
+                        {'sex': 'M', 'minage': 70, 'maxage': 79, 'percentage': 0.034999910203506485},
+                        {'sex': 'M', 'minage': 80, 'maxage': 89, 'percentage': 0.020573067406773973},
+                        {'sex': 'M', 'minage': 90, 'maxage': 99, 'percentage': 0.0032451071272167646},
+                        {'sex': 'M', 'minage': 100, 'maxage': 109, 'percentage': 0.00006631125675027872},
+                        {'sex': 'F', 'minage': 0, 'maxage': 9, 'percentage': 0.04985363171556892},
+                        {'sex': 'F', 'minage': 10, 'maxage': 19, 'percentage': 0.046919358604369084},
+                        {'sex': 'F', 'minage': 20, 'maxage': 29, 'percentage': 0.04919328211709739},
+                        {'sex': 'F', 'minage': 30, 'maxage': 39, 'percentage': 0.07687823181033876},
+                        {'sex': 'F', 'minage': 40, 'maxage': 49, 'percentage': 0.07994650891955478},
+                        {'sex': 'F', 'minage': 50, 'maxage': 59, 'percentage': 0.06823980913409933},
+                        {'sex': 'F', 'minage': 60, 'maxage': 69, 'percentage': 0.05455896797580744},
+                        {'sex': 'F', 'minage': 70, 'maxage': 79, 'percentage': 0.04040980356671672},
+                        {'sex': 'F', 'minage': 80, 'maxage': 89, 'percentage': 0.03245936017926143},
+                        {'sex': 'F', 'minage': 90, 'maxage': 99, 'percentage': 0.008348310927956964},
+                        {'sex': 'F', 'minage': 100, 'maxage': 109, 'percentage': 0.00028596729473557696}
+                        ];
+        
+        getRandomSexYear = function(piramide) {
+            var pir = [0];         
+            var randomCohort = {};
+            var i = 0;
+            piramide.forEach(function(p,i){
+                pir.push(p.percentage+pir[pir.length - 1]);
+            });    
+            pir[pir.length - 1] = 1;
+            pir.shift();
+            var alea = Math.random();
+            randomCohort = piramide[pir.length - 1];
+            
+            for(i = 0; i < pir.length -1; i++) {
+                if (alea <= pir[i]) {
+                    randomCohort = piramide[i];
+                    break;
+                }
+            }
+
+            yearnac = 2016 - randomCohort.minage + Math.floor(Math.random() * (randomCohort.maxage - randomCohort.minage));
+            return {'sex': randomCohort.sex, 'yearnac': yearnac }
+        }
+        
+        for (var i = 0; i < size; i++) {
+            self.dataset.id.push(i);
+            var sexyear = getRandomSexYear(piramide);
+            self.dataset.sex.push(sexyear.sex);
+            self.dataset.yearnac.push(sexyear.yearnac);
+
+        }
+        return self.dataset;
+    }    
+        
     self.getRelations = function() {
         return self.relations;
     }
