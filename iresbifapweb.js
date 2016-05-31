@@ -6,13 +6,64 @@ $(document).ready(function(){
         e.preventDefault();
     });
     
-
+    hideElement = function(dom_element) {
+        if(dom_element.hasClass("hidden") === false) {
+            dom_element.addClass("hidden");
+        }
+    };
+    
+    showElement = function(dom_element) {
+        if(dom_element.hasClass("hidden") === true) {
+            dom_element.toggleClass("hidden");
+        };
+    };
 
     normalizeShortname = function(dom_element) {
         if(dom_element.val().length > 16) {
             dom_element.val(dom_element.val().slice(0,16));
         }
         dom_element.val(dom_element.val().toUpperCase().replace(' ','_'));
+    };
+    
+    tableHtml = function (table) {
+        var html = "";
+        html = html + "<div class=\"iretable\">"
+        html = html + "<h3>"+table.fullname+"</h3>";
+        html = html + "<table class=\"table\">";
+        table.rows.forEach(function(row){
+            html = html + "<tr>";
+            row.forEach(function(col){
+               html = html + "<td>" + col.content.toString() + "</td>";
+            }); 
+            html = html + "</tr>";
+        });
+        var btnText = "";
+        switch(table.status){
+            case "catalogue":
+                btnText = "Seleccionar";
+                btnId = table.shortname + "_SELECT";
+                break;
+            case "selected":
+                btnText = "Cancelar selección";
+                btnId = table.shortname + "_UNSELECT";
+                break;
+            case "discarded":
+                btnText = "Cancelar descarte";
+                btnId = table.shortname + "_UNDISCARD";
+                break;
+            default:
+                btnText = "Seleccionar";
+                btnId = table.shortname + "_SELECT";
+                
+        }
+            
+        
+        html = html + "</table><button id=\""+btnId+"\"class=\"btn btn-info btn-lg\">"+btnText+"</button>";
+        if(table.status==="catalogue") {
+            html = html + "<button id=\""+table.shortname+"_DISCARD\" class=\"btn btn-danger btn-lg\">Descartar</button>";
+        }
+        html = html + "</div>";
+        return html;
     }
     
     
@@ -27,7 +78,7 @@ $(document).ready(function(){
         $.each($(modal).find("input[type=checkbox]"),function(i,e){
             $(e).attr("checked",false);
         })
-    }
+    };
 
     reloadGroups = function(select_obj, groups_container,ire,focusGroup) {
         
@@ -230,7 +281,26 @@ $(document).ready(function(){
                
         });
         
-    }
+    };
+    
+    reloadTables = function(ire) {
+        $("#tablas_container").html("");
+      ire.getTables().forEach(function(t,i){
+          console.log(t);
+          switch(t.status){
+            case "catalogue":
+                $("#tablas_catalogo_container").append(self.tableHtml(t));
+                break;
+            case "selected":
+                $("#tablas_seleccion_container").append(self.tableHtml(t));
+                break;
+            case "discarded":
+                $("#tablas_descartadas_container").append(self.tableHtml(t));
+                break;
+          }
+          
+      });  
+    };
     
     showCovariableDetails = function(covariables_container,focusVariable) {
         $.each(covariables_container.find(".covariable-details"),function(){
@@ -316,6 +386,103 @@ $(document).ready(function(){
         normalizeShortname($(this));
     });
 
+    
+    
+    $("#secTablas").on("click",function(){
+        
+        $.each($(".section"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
+        
+        $("#pantalla_tablas").toggleClass("hidden");
+        
+        $("#subsecTablasCatalogo").on("click",function(e){
+            self.showElement($("#tablas_catalogo_container"));
+            self.hideElement($("#pantalla_tablas_seleccion"));
+            self.showElement($("#pantalla_tablas_catalogo"));
+            //self.showElement($("#tablas_selector"));
+            self.reloadTables(ire);
+            
+            $("#subsecTablasCatalogo").addClass("active");
+            
+            
+        });
+        
+        $("#subsecTablasSeleccion").on("click",function(e){
+            self.showElement($("#pantalla_tablas_seleccion"));
+            self.hideElement($("#pantalla_tablas_catalogo"));
+        });
+        
+        $("#subsecTablasCatalogo").click();
+        $("#subsecTablasCatalogo").addClass("active");
+    })
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    $("#secVariables").on("click",function(){
+        
+        $.each($(".section"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
+
+        $("#pantalla_variables").toggleClass("hidden");
+        $("#subsecVariablesVariables").click();
+    });
+    
+    $("#subsecVariablesVariables").on("click",function(){
+        reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);
+        //muestra subsect variables_variables
+        $.each($(".subsect"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
+
+        $("#var_selector").toggleClass("hidden");
+        $("#variables_container").toggleClass("hidden");
+
+    });
+
+    $("#subsecVariablesGrupos").on("click", function(){
+        reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,ire.getGroups()[0]);
+
+        //muestra subsect variables_grupos
+        $.each($(".subsect"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
+
+        $("#group_selector").toggleClass("hidden");
+        $("#variables_group_container").toggleClass("hidden");
+
+    });
+    
+    $("#subsecVariablesRelaciones").on("click", function(){
+
+        self.reloadRelations(ire);
+        //muestra subsect variables_grupos
+        $.each($(".subsect"),function(a,b){
+            if($(b).hasClass("hidden")==false) {
+                $(b).toggleClass("hidden");
+            }
+        });
+        
+        $("#relation_selector").toggleClass("hidden");
+        $("#variables_relaciones_container").toggleClass("hidden");
+    });
+    
     $("#subsecVariablesResumen").on("click",function(){
         
         genVariablesHtml = function(ire) {
@@ -436,74 +603,6 @@ $(document).ready(function(){
 
     });
     
-    $("#secTablas").on("click",function(){
-        
-        $.each($(".section"),function(a,b){
-            if($(b).hasClass("hidden")==false) {
-                $(b).toggleClass("hidden");
-            }
-        });
-
-        $("#pantalla_tablas").toggleClass("hidden");
-        $("#subsecTablasXXXX").click();
-    })
-    
-    $("#secVariables").on("click",function(){
-        
-        $.each($(".section"),function(a,b){
-            if($(b).hasClass("hidden")==false) {
-                $(b).toggleClass("hidden");
-            }
-        });
-
-        $("#pantalla_variables").toggleClass("hidden");
-        $("#subsecVariablesVariables").click();
-    });
-    
-    $("#subsecVariablesVariables").on("click",function(){
-        reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);
-        //muestra subsect variables_variables
-        $.each($(".subsect"),function(a,b){
-            if($(b).hasClass("hidden")==false) {
-                $(b).toggleClass("hidden");
-            }
-        });
-
-        $("#var_selector").toggleClass("hidden");
-        $("#variables_container").toggleClass("hidden");
-
-    });
-
-    $("#subsecVariablesGrupos").on("click", function(){
-        reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,ire.getGroups()[0]);
-
-        //muestra subsect variables_grupos
-        $.each($(".subsect"),function(a,b){
-            if($(b).hasClass("hidden")==false) {
-                $(b).toggleClass("hidden");
-            }
-        });
-
-        $("#group_selector").toggleClass("hidden");
-        $("#variables_group_container").toggleClass("hidden");
-
-    });
-    
-    $("#subsecVariablesRelaciones").on("click", function(){
-
-        self.reloadRelations(ire);
-        //muestra subsect variables_grupos
-        $.each($(".subsect"),function(a,b){
-            if($(b).hasClass("hidden")==false) {
-                $(b).toggleClass("hidden");
-            }
-        });
-        
-        $("#relation_selector").toggleClass("hidden");
-        $("#variables_relaciones_container").toggleClass("hidden");
-    });
-    
-    
     $("#testbtn").on("click",function(e){
         e.preventDefault();
         console.log(ire.getDataset());
@@ -513,6 +612,7 @@ $(document).ready(function(){
     reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);  
     reloadGroups($("#listado_grupos"), $("#variables_group_container"),ire,ire.getGroups()[0]);
     reloadRelations(ire);
+    reloadTables(ire);
     $("#secVariables").click();
     
 });

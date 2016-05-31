@@ -5,64 +5,9 @@ BIFAP.ire = function () {
     self.variables = [];
     self.groups = [];
     
-    //for testing
-    self.variables = [{'shortname':'HTA', 
-                     'fullname': 'Hipertensión arterial',
-                     'type': 'diagnostico'
-                     },
-                     {'shortname':'DM2', 
-                     'fullname': 'Diabetes mellitus no insulinodependiente',
-                     'type': 'diagnostico'
-                     },
-                     {'shortname':'IBUPROFENO', 
-                     'fullname': 'Ibuprofeno',
-                     'type': 'farmaco'
-                     },
-                     {'shortname':'PARACETAMOL', 
-                     'fullname': 'Paracetamol',
-                     'type': 'farmaco'
-                     }
-                    ];
-                    
-    self.groups = [{'shortname':'RCV',
-                    'fullname':'Enfermedad que aumenta el riesgo cardiovascular',
-                    'variables': ["HTA","DM2"]
-                    },
-                    {'shortname':'ANALGESICO',
-                    'fullname':'Fármacos analgésicos',
-                    'variables': ["IBUPROFENO","PARACETAMOL"]
-                    }];
-                    
-    self.relations = [
-                        {
-                            'shortname': 'HTA_DM2',
-                            'vara': 'HTA',
-                            'varb': 'DM2'
-                        },
-                        {
-                            'shortname': 'HTA_IBUPROFENO',
-                            'vara': 'HTA',
-                            'varb': 'IBUPROFENO'
-                        },
-                        {
-                            'shortname': 'HTA_PARACETAMOL',
-                            'vara': 'HTA',
-                            'varb': 'PARACETAMOL'
-                        },
-                        {
-                            'shortname': 'RCV_IBUPROFENO',
-                            'vara': 'RCV',
-                            'varb': 'IBUPROFENO'
-                        },
-                        {
-                            'shortname': 'RCV_ANALGESICO',
-                            'vara': 'RCV',
-                            'varb': 'ANALGESICO'
-                        }
-                    ]
-    self.dataset = {};                
+             
 
-        
+    self.addone = function(number) { return number + 1};
     
     
     self.summarizeVarDataset = function(varshortname,sex,agemin,agemax) {
@@ -600,14 +545,259 @@ BIFAP.ire = function () {
         return true;
     }
 
+    self.getTables = function () {
+        return self.tables;
+    }
+    self.getTableByShortname = function (shortname) {
+        for (var i = 0; i<self.tables.length; i++) {
+            if(self.tables[i].shortname === shortname){
+              return i;
+            };
+        }
+        return -1;
+    }
+
+
+    self.addTable = function(tableName,params) {
+        var tableName = tableName || '';
+        var params = params || {};
+        switch(tableName) {
+            case "prevalencia":
+                params.agegrps = params.agegrps || [0,2, 14,25,45,65,75,110];
+                var myVar = self.getVariables()[self.getVariableByShortname(params.varshortname)];
+                var newTab = {
+                    
+                            'shortname': myVar.shortname + "_PREVTAB",
+                            'fullname': "Tabla: " + myVar.fullname,
+                            'footer': "Pacientes con " + myVar.fullname,
+                            'status': "catalogue",
+                            'rows': []
+                            }
+                newTab.rows.push([
+                                     {'colspan': 1, 'content': ""},
+                                     {'colspan': 1, 'content': "Pacientes con "+ myVar.shortname},
+                                     {'colspan': 1, 'content': ""},
+                                     {'colspan': 1, 'content': ""},
+                                     {'colspan': 1, 'content': "Pacientes totales"},
+                                     {'colspan': 1, 'content': ""},
+                                     {'colspan': 1, 'content': ""},
+                                     {'colspan': 1, 'content': "% con "+ myVar.shortname},
+                                     {'colspan': 1, 'content': ""},
+                                     {'colspan': 1, 'content': ""}
+                                 ],[
+                                       {'colspan': 1, 'content': ""},
+                                       {'colspan': 1, 'content': "Hombres"},
+                                       {'colspan': 1, 'content': "Mujeres"},
+                                       {'colspan': 1, 'content': "Ambos"},
+                                       {'colspan': 1, 'content': "Hombres"},
+                                       {'colspan': 1, 'content': "Mujeres"},
+                                       {'colspan': 1, 'content': "Ambos"},
+                                       {'colspan': 1, 'content': "Hombres"},
+                                       {'colspan': 1, 'content': "Mujeres"},
+                                       {'colspan': 1, 'content': "Ambos"}
+                                   ]);
+                
+                for(var i = 0; i < params.agegrps.length - 1; i++) {
+                    var agemin = params.agegrps[i];
+                    var agemax = params.agegrps[i+1];
+                    var summary_male = self.summarizeVarDataset(myVar.shortname,"M",agemin,agemax);
+                    var summary_female = self.summarizeVarDataset(myVar.shortname,"F",agemin,agemax);
+                    newTab.rows.push([
+                        {'colspan': 1, 'content':  agemin.toString() + " a " + agemax.toString()},
+                        {'colspan': 1, 'content': summary_male.sum},
+                        {'colspan': 1, 'content': summary_female.sum},
+                        {'colspan': 1, 'content': summary_male.sum + summary_female.sum},
+                        {'colspan': 1, 'content': summary_male.count},
+                        {'colspan': 1, 'content': summary_female.count},
+                        {'colspan': 1, 'content': summary_male.count + summary_female.count},
+                        {'colspan': 1, 'content': parseFloat(Math.round((summary_male.sum / summary_male.count)*100)/100).toFixed(2)},
+                        {'colspan': 1, 'content': parseFloat(Math.round((summary_female.sum / summary_female.count)*100)/100).toFixed(2)},
+                        {'colspan': 1, 'content': parseFloat(Math.round(((summary_male.sum + summary_female.sum) / (summary_male.count + summary_female.count))*100)/100).toFixed(2)}
+                    ]);
+                }
+                
+                var summary_male = self.summarizeVarDataset(myVar.shortname,"M",0,110);
+                var summary_female = self.summarizeVarDataset(myVar.shortname,"F",0,110);
+                
+                newTab.rows.push([
+                    
+                                     {'colspan': 1, 'content': "Total"},
+                                     {'colspan': 1, 'content': summary_male.sum},
+                                     {'colspan': 1, 'content': summary_female.sum},
+                                     {'colspan': 1, 'content': summary_male.sum + summary_female.sum},
+                                     {'colspan': 1, 'content': summary_male.count},
+                                     {'colspan': 1, 'content': summary_female.count},
+                                     {'colspan': 1, 'content': summary_male.count + summary_female.count},
+                                     {'colspan': 1, 'content': parseFloat(Math.round((summary_male.sum / summary_male.count)*100)/100).toFixed(2)},
+                                     {'colspan': 1, 'content': parseFloat(Math.round((summary_female.sum / summary_female.count)*100)/100).toFixed(2)},
+                                     {'colspan': 1, 'content': parseFloat(Math.round(((summary_male.sum + summary_female.sum) / (summary_male.count + summary_female.count))*100)/100).toFixed(2)}
+                                 ]);
+                self.tables.push(newTab);
+                break;
+                
+            case "contingencia":
+                params.vara = params.vara || '';
+                params.varb = params.varb || '';
+                var myContTab = self.contingencyTabVarDataset(params.vara, params.varb);
+                var newTab = {
+                    
+                            'shortname': params.vara + "_" + params.varb + "_CONTTAB",
+                            'fullname': "Tabla: " + params.vara + "_" + params.varb,
+                            'footer': "Tabla de contingencia de pacientes con " + params.vara + " y " + params.varb,
+                            'status': "catalogue",
+                            'rows': []
+                            };
+                newTab.rows.push([
+                                    {'colspan': 1, 'content': ''},
+                                    {'colspan': 1, 'content': params.varb + " SI"},
+                                    {'colspan': 1, 'content': params.varb + " NO"},
+                                    {'colspan': 1, 'content': ''}
+                                ],
+                                [
+                                    {'colspan': 1, 'content': params.vara + " SI"},
+                                    {'colspan': 1, 'content': myContTab.a_t_b_t},
+                                    {'colspan': 1, 'content': myContTab.a_t_b_f},
+                                    {'colspan': 1, 'content': myContTab.a_t_b_t + myContTab.a_t_b_f}
+                                ],
+                                [
+                                    {'colspan': 1, 'content': params.vara + " NO"},
+                                    {'colspan': 1, 'content': myContTab.a_f_b_t},
+                                    {'colspan': 1, 'content': myContTab.a_f_b_f},
+                                    {'colspan': 1, 'content': myContTab.a_f_b_t + myContTab.a_f_b_f}
+                                ],
+                                [
+                                    {'colspan': 1, 'content': ""},
+                                    {'colspan': 1, 'content': myContTab.a_t_b_t+myContTab.a_f_b_t},
+                                    {'colspan': 1, 'content': myContTab.a_t_b_f+myContTab.a_f_b_f},
+                                    {'colspan': 1, 'content': myContTab.a_t_b_t+myContTab.a_f_b_t+myContTab.a_t_b_f+myContTab.a_f_b_f}
+                                ],
+                                [
+                                    {'colspan': 1, 'content': ""},
+                                    {'colspan': 1, 'content': ""},
+                                    {'colspan': 1, 'content': "Odds Ratio: "},
+                                    {'colspan': 1, 'content': parseFloat(Math.round(myContTab.odds_ratio*100)/100).toFixed(2)}
+                                ]
+                                
+                                
+                                
+                                );
+                console.log(myContTab);
+                self.tables.push(newTab);
+                break;
+            default: 
+                return false;
+                break;
+        }
+    }
+
+    
+    //for testing
+    self.variables = [{'shortname':'HTA', 
+                     'fullname': 'Hipertensión arterial',
+                     'type': 'diagnostico'
+                     },
+                     {'shortname':'DM2', 
+                     'fullname': 'Diabetes mellitus no insulinodependiente',
+                     'type': 'diagnostico'
+                     },
+                     {'shortname':'IBUPROFENO', 
+                     'fullname': 'Ibuprofeno',
+                     'type': 'farmaco'
+                     },
+                     {'shortname':'PARACETAMOL', 
+                     'fullname': 'Paracetamol',
+                     'type': 'farmaco'
+                     }
+                    ];
+                    
+    self.groups = [{'shortname':'RCV',
+                    'fullname':'Enfermedad que aumenta el riesgo cardiovascular',
+                    'variables': ["HTA","DM2"]
+                    },
+                    {'shortname':'ANALGESICO',
+                    'fullname':'Fármacos analgésicos',
+                    'variables': ["IBUPROFENO","PARACETAMOL"]
+                    }];
+                    
+    self.relations = [
+                        {
+                            'shortname': 'HTA_DM2',
+                            'vara': 'HTA',
+                            'varb': 'DM2'
+                        },
+                        {
+                            'shortname': 'HTA_IBUPROFENO',
+                            'vara': 'HTA',
+                            'varb': 'IBUPROFENO'
+                        },
+                        {
+                            'shortname': 'HTA_PARACETAMOL',
+                            'vara': 'HTA',
+                            'varb': 'PARACETAMOL'
+                        },
+                        {
+                            'shortname': 'RCV_IBUPROFENO',
+                            'vara': 'RCV',
+                            'varb': 'IBUPROFENO'
+                        },
+                        {
+                            'shortname': 'RCV_ANALGESICO',
+                            'vara': 'RCV',
+                            'varb': 'ANALGESICO'
+                        }
+                    ];
+
+    self.tables = [];
+    self.dataset = {}; 
+    
+    /* Table data model
+       {
+       'shortname': 'asdf',
+       'fullname': 'asdf',
+       'footer': 'asdf',
+       'rows': [
+                   [
+                       {'colspan': 1, 'content': self.addone(0)},
+                       {'colspan': 1, 'content': self.addone(1)},
+                       {'colspan': 1, 'content': self.addone(3)}
+                   ],
+                   [
+                       {'colspan': 1, 'content': self.addone(0)},
+                       {'colspan': 1, 'content': self.addone(1)},
+                       {'colspan': 1, 'content': self.addone(3)}
+                   ],
+                   [
+                       {'colspan': 1, 'content': self.addone(0)},
+                       {'colspan': 1, 'content': self.addone(1)},
+                       {'colspan': 1, 'content': self.addone(3)}
+                   ]
+               ]
+       }
+     */
+    
     
     self.generateRandomDatasetBase(10000);
     self.variables.forEach(function(variable){
         self.addRandomVarToDataset(variable.shortname);    
     });
     self.correlateVars("HTA","DM2",5);
-    self.correlateVars("IBUPROFENO","HTA",3);
-
+    self.addTable("prevalencia",{'varshortname':"HTA"});
+    self.addTable("prevalencia",{'varshortname':"DM2"});
+    self.addTable("prevalencia",{'varshortname':"PARACETAMOL"});
+    self.addTable("prevalencia",{'varshortname':"IBUPROFENO"});
+    
+    self.relations.forEach(function(relation){
+        console.log(relation.vara);
+        console.log(relation.varb);
+        if(self.getVariableByShortname(relation.vara) > -1 && self.getVariableByShortname(relation.varb) > -1) {
+            self.addTable("contingencia",{'vara': relation.vara, 'varb': relation.varb});
+        }
+    });
+    
+    console.log(self);
+    console.log(self.summarizeVarDataset('HTA','',0,110));
+    
+    
     
     
 }
