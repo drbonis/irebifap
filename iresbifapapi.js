@@ -60,17 +60,72 @@ BIFAP.ire = function () {
                             'varb': 'ANALGESICO'
                         }
                     ]
-                    
-        self.dataset = {};
+    self.dataset = {};                
+
+        
     
     
-    self.summarizeVarDataset = function(varshortname) {
+    self.summarizeVarDataset = function(varshortname,sex,agemin,agemax) {
+        
+        results = {'shortname': varshortname, 'sum': null, 'count': null, 'mean': null};
+        
         function add(a,b) { return a+b };
-        var sum = self.dataset[varshortname].reduce(add, 0);
-        var count = self.dataset[varshortname].length;
-        var mean = sum / count;
-        return {'shortname': varshortname, 'sum': sum, 'count': count, 'mean': mean}
+        var patients_index = self.filterVar('','',sex,agemin, agemax,2016);
+        var patientsVar = [];
+        patients_index.forEach(function(pmindex){
+                patientsVar.push(self.dataset[varshortname][pmindex]);
+        });
+        results.sum = patientsVar.reduce(add, 0);
+        results.count = patientsVar.length;
+        results.mean = results.sum / results.count;
+        return results;
     }
+    
+    
+    
+    self.filterVar = function(varshortname, value, sex, agemin, agemax, curryear) {
+        // devuelve array con los index de pacientes que cumple las condiciones del filtro
+        var varshortname = varshortname || '';
+        var value = value || '';
+        var sex = sex || '';
+        var agemin = agemin || 0;
+        var agemax = agemax || 110;
+        var curryear = curryear || 2016;
+        var result = [];
+        
+        self.getDataset()['id'].forEach(function(index){
+            var isVar = 0;
+            var isAge = 0;
+            var isSex = 0;
+            if (varshortname === '') {
+               isVar = 1;
+            } else {
+                if(self.dataset[varshortname][index] === value) {
+                    isVar = 1;
+                }
+            };
+            if (sex === '') {
+                isSex = 1;
+            } else {
+                if(self.dataset['sex'][index] === sex) {
+                    isSex = 1;
+                }
+            };
+            if (agemin <= curryear - self.dataset['yearnac'][index] && agemax >= curryear - self.dataset['yearnac'][index]) {
+                isAge = 1;
+            }
+            
+            if(isVar == 1 && isAge == 1 && isSex == 1) {
+                result.push(index);
+            }
+
+        });
+        
+        return result;
+        
+    }
+    
+    
     
     self.contingencyTabVarDataset = function(vara, varb) {
         var cell_a = 0;
@@ -92,8 +147,51 @@ BIFAP.ire = function () {
                 }
             }
         });
-        return [cell_a, cell_b, cell_c, cell_d, eval((cell_a * cell_d) / (cell_b * cell_c))];
+        return {'a_f_b_f': cell_a, 'a_f_b_t': cell_b, 'a_t_b_f': cell_c, 'a_t_b_t': cell_d, 'odds_ratio': eval((cell_a * cell_d) / (cell_b * cell_c))};
     }
+    
+    self.getProbVar = function(distribution,age,sex) {
+        var distribution = distribution || {'M': {
+                0: 0.1,
+                10: 0.1,
+                20: 0.1,
+                30: 0.1,
+                40: 0.1,
+                50: 0.1,
+                60: 0.1,
+                70: 0.1,
+                80: 0.1,
+                90: 0.1,
+                100: 0.1
+                }, 
+        'F': {
+                  0: 0.1,
+                  10: 0.1,
+                  20: 0.1,
+                  30: 0.1,
+                  40: 0.1,
+                  50: 0.1,
+                  60: 0.1,
+                  70: 0.1,
+                  80: 0.1,
+                  90: 0.1,
+                  100: 0.1
+                  }
+        };
+        var probVarForAgeSex = 0;
+        var flag = 0;
+        Object.keys(distribution[sex]).forEach(function(key, index){
+            if(parseInt(key) > age){
+               if(flag == 0) {
+                probVarForAgeSex = distribution[sex][parseInt(key)];
+               }
+               flag = 1;
+            };
+        });
+        return probVarForAgeSex;
+    }
+        
+    
     
     self.addRandomVarToDataset = function(shortname, distribution) {
         var distribution = distribution || {'M': {
@@ -103,24 +201,24 @@ BIFAP.ire = function () {
                                                     30: 0.1,
                                                     40: 0.1,
                                                     50: 0.1,
-                                                    60: 0.1,
-                                                    70: 0.1,
-                                                    80: 0.1,
-                                                    90: 0.1,
-                                                    100: 0.1
+                                                    60: 0.2,
+                                                    70: 0.2,
+                                                    80: 0.2,
+                                                    90: 0.2,
+                                                    100: 0.2
                                                     }, 
                                             'F': {
-                                                      0: 0.1,
-                                                      10: 0.1,
-                                                      20: 0.1,
-                                                      30: 0.1,
-                                                      40: 0.1,
-                                                      50: 0.1,
-                                                      60: 0.1,
-                                                      70: 0.1,
-                                                      80: 0.1,
-                                                      90: 0.1,
-                                                      100: 0.1
+                                                      0: 0.2,
+                                                      10: 0.2,
+                                                      20: 0.2,
+                                                      30: 0.2,
+                                                      40: 0.2,
+                                                      50: 0.2,
+                                                      60: 0.4,
+                                                      70: 0.4,
+                                                      80: 0.4,
+                                                      90: 0.4,
+                                                      100: 0.4
                                                       }
                                             };
                                             
@@ -128,17 +226,8 @@ BIFAP.ire = function () {
         self.dataset.id.forEach(function(index){
             var age = 2016 - self.dataset.yearnac[index];
             var sex = self.dataset.sex[index];
-            var probVarForAgeSex = 0;
-            var flag = 0;
-            Object.keys(distribution[self.dataset.sex[index]]).forEach(function(key, index){
-                if(parseInt(key) > age){
-                   if(flag == 0) {
-                    probVarForAgeSex = distribution[sex][parseInt(key)];
-                   }
-                   flag = 1;
-                };
-            });
-            if(Math.random() <= probVarForAgeSex) {
+
+            if(Math.random() <= self.getProbVar(distribution,age,sex)) {
                 self.dataset[shortname].push(1);
             } else {
                 self.dataset[shortname].push(0);
@@ -147,6 +236,8 @@ BIFAP.ire = function () {
         });
         return self.dataset;
     }
+    
+
         
     self.generateRandomDatasetBase = function(size) {
         var i = 0;
@@ -196,7 +287,8 @@ BIFAP.ire = function () {
             }
 
             yearnac = 2016 - randomCohort.minage + Math.floor(Math.random() * (randomCohort.maxage - randomCohort.minage));
-            return {'sex': randomCohort.sex, 'yearnac': yearnac }
+
+            return {'sex': randomCohort.sex, 'yearnac': Math.min(yearnac,2016) }
         }
         
         for (var i = 0; i < size; i++) {
@@ -208,6 +300,84 @@ BIFAP.ire = function () {
         }
         return self.dataset;
     }    
+    
+    self.getDataset = function(){
+        return self.dataset;
+    }
+    
+    self.getContingencyforCorrelateVars = function (vara,varb,tor,sex,agemin,agemax) {
+        var a = 0; // vara && varb
+        var b = 0; // vara && !varb
+        var c = 0; // a + b, vara
+        var d = 0; // !vara && varb
+        var e = 0; // !vara && !varb
+        var f = 0; // 1 - c, !vara
+        var g = 0; // a + d, varb
+        var h = 0; // b + e, !varb
+        var i = self.summarizeVarDataset(vara,sex,agemin,agemax).count; // a + b + d + e
+        a = 0;
+        c = self.summarizeVarDataset(vara,sex,agemin,agemax).sum;
+        g = self.summarizeVarDataset(varb,sex,agemin,agemax).sum;
+        f = i - c;
+        h = i - g;
+        
+        b = c - a;
+        d = g - a;
+        e = i - a - b - d;
+        
+        or = (a*e)/(d*b);
+        while (tor > or) {
+            a = a + 1;
+            b = c - a;
+            d = g - a;
+            e = i - a - b - d;
+            or = (a*e)/(d*b);
+        }
+        
+        return {'a_f_b_f': e/i, 'a_f_b_t': d/i, 'a_t_b_f': b/i, 'a_t_b_t': a/i}
+    }
+    
+    self.correlateVars = function(vara,varb,tor) {
+        var agegroups = [0,10,20,30,40,50,60,70,80,90,100,110];
+        var sex = ['M','F'];
+        for(i=0;i<agegroups.length -1;i++) {
+            agemin = agegroups[i];
+            agemax = agegroups[i+1];
+        
+            sex.forEach(function(sex){
+                
+                var probs = self.getContingencyforCorrelateVars(vara,varb,tor,sex,agemin,agemax);
+                
+                self.filterVar('','',sex,agemin,agemax).forEach(function(index){
+                //self.getDataset().id.forEach(function(index){
+                    var aleator = Math.random();
+                    if(aleator<=probs.a_t_b_t) { // ambas true
+                        //console.log(aleator,"a true, b true");
+                        self.dataset[vara][index] = 1;
+                        self.dataset[varb][index] = 1;
+                    } else if (aleator<=probs.a_t_b_t + probs.a_t_b_f) {
+                        //console.log(aleator,"a true, b false");
+                        self.dataset[vara][index] = 1;
+                        self.dataset[varb][index] = 0;
+                    } else if (aleator<=probs.a_t_b_t + probs.a_t_b_f + probs.a_f_b_t) {
+                       //console.log(aleator,"a false, b true");
+                       self.dataset[vara][index] = 0;
+                       self.dataset[varb][index] = 1;
+                    } else {
+                        //console.log(aleator,"a false, b false");
+                        self.dataset[vara][index] = 0;
+                        self.dataset[varb][index] = 0;
+                    }
+                });
+                
+            });
+            
+        };
+        
+
+        return self.contingencyTabVarDataset(vara,varb);
+            
+    }
         
     self.getRelations = function() {
         return self.relations;
@@ -429,4 +599,15 @@ BIFAP.ire = function () {
         });
         return true;
     }
+
+    
+    self.generateRandomDatasetBase(10000);
+    self.variables.forEach(function(variable){
+        self.addRandomVarToDataset(variable.shortname);    
+    });
+    self.correlateVars("HTA","DM2",5);
+    self.correlateVars("IBUPROFENO","HTA",3);
+
+    
+    
 }

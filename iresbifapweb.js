@@ -306,8 +306,6 @@ $(document).ready(function(){
             new_checkbox_html = $("#variable_checklist_row_template").html().replace(/\{\$shortname_id\}/g,v.shortname).replace(/\{\$shortname\}/g,v.shortname).replace(/\{\$fullname\}/g,v.fullname);
             $("#lista_grupos_con_checklist").append(new_checkbox_html);
         });
-        
-        
     });
     
     $("#new_variable_shortname").on("input",function(e){
@@ -508,14 +506,8 @@ $(document).ready(function(){
     
     $("#testbtn").on("click",function(e){
         e.preventDefault();
+        console.log(ire.getDataset());
         
-        console.log(ire.generateRandomDatasetBase(100000));
-        ire.addRandomVarToDataset("HTA");
-        ire.addRandomVarToDataset("DIABETES");
-        console.log(ire.summarizeVarDataset("HTA"));
-        console.log(ire.summarizeVarDataset("DIABETES"));
-        console.log(ire.summarizeVarDataset("yearnac"));
-        console.log(ire.contingencyTabVarDataset("HTA","DIABETES"));
     });
 
     reloadCovariables($("#listado_variables"), $("#variables_container"),ire,ire.getVariables()[0]);  
