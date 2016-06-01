@@ -27,6 +27,10 @@ BIFAP.ire = function () {
     }
     
     
+    self.setStatusTable = function (tableshortname,newstatus) {
+        self.tables[self.getTableByShortname(tableshortname)].status = newstatus;
+        return self.tables[self.getTableByShortname(tableshortname)];
+    };
     
     self.filterVar = function(varshortname, value, sex, agemin, agemax, curryear) {
         // devuelve array con los index de pacientes que cumple las condiciones del filtro
@@ -681,7 +685,6 @@ BIFAP.ire = function () {
                                 
                                 
                                 );
-                console.log(myContTab);
                 self.tables.push(newTab);
                 break;
             default: 
@@ -787,15 +790,13 @@ BIFAP.ire = function () {
     self.addTable("prevalencia",{'varshortname':"IBUPROFENO"});
     
     self.relations.forEach(function(relation){
-        console.log(relation.vara);
-        console.log(relation.varb);
+
         if(self.getVariableByShortname(relation.vara) > -1 && self.getVariableByShortname(relation.varb) > -1) {
             self.addTable("contingencia",{'vara': relation.vara, 'varb': relation.varb});
         }
     });
     
     console.log(self);
-    console.log(self.summarizeVarDataset('HTA','',0,110));
     
     
     

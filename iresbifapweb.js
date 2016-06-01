@@ -42,25 +42,29 @@ $(document).ready(function(){
             case "catalogue":
                 btnText = "Seleccionar";
                 btnId = table.shortname + "_SELECT";
+                btnClass = "btn-tbl-select";
                 break;
             case "selected":
                 btnText = "Cancelar selección";
                 btnId = table.shortname + "_UNSELECT";
+                btnClass = "btn-tbl-unselect";
                 break;
             case "discarded":
                 btnText = "Cancelar descarte";
                 btnId = table.shortname + "_UNDISCARD";
+                btnClass = "btn-tbl-undiscard";
                 break;
             default:
                 btnText = "Seleccionar";
                 btnId = table.shortname + "_SELECT";
+                btnClass = "btn-tbl-select";
                 
         }
             
         
-        html = html + "</table><button id=\""+btnId+"\"class=\"btn btn-info btn-lg\">"+btnText+"</button>";
+        html = html + "</table><button id=\""+btnId+"\"class=\"btn btn-info btn-lg "+btnClass+"\" table-target=\""+table.shortname+"\">"+btnText+"</button>";
         if(table.status==="catalogue") {
-            html = html + "<button id=\""+table.shortname+"_DISCARD\" class=\"btn btn-danger btn-lg\">Descartar</button>";
+            html = html + "<button id=\""+table.shortname+"_DISCARD\" class=\"btn btn-danger btn-lg btn-tbl-discard\" table-target=\""+table.shortname+"\">Descartar</button>";
         }
         html = html + "</div>";
         return html;
@@ -284,14 +288,16 @@ $(document).ready(function(){
     };
     
     reloadTables = function(ire) {
-        $("#tablas_container").html("");
+        $("#tablas_catalogo_container").html("");
+        $("#tablas_seleccion_container").html("");
+        $("#tablas_descartadas_container").html("");
       ire.getTables().forEach(function(t,i){
-          console.log(t);
           switch(t.status){
             case "catalogue":
                 $("#tablas_catalogo_container").append(self.tableHtml(t));
                 break;
             case "selected":
+                console.log("selected",t);
                 $("#tablas_seleccion_container").append(self.tableHtml(t));
                 break;
             case "discarded":
@@ -299,7 +305,23 @@ $(document).ready(function(){
                 break;
           }
           
-      });  
+      });
+      $(".btn-tbl-select").on("click", function(e){
+          console.log(ire.setStatusTable($(this).attr('table-target'),'selected'));
+          self.reloadTables(ire);
+      });
+      $(".btn-tbl-discard").on("click", function(e){
+          console.log(ire.setStatusTable($(this).attr('table-target'),'discarded'));
+          self.reloadTables(ire);
+      });
+      $(".btn-tbl-unselect").on("click", function(e){
+          console.log(ire.setStatusTable($(this).attr('table-target'),'catalogue'));
+          self.reloadTables(ire);
+      });
+      $(".btn-tbl-undiscard").on("click", function(e){
+          console.log(ire.setStatusTable($(this).attr('table-target'),'catalogue'));
+          self.reloadTables(ire);
+      });
     };
     
     showCovariableDetails = function(covariables_container,focusVariable) {
@@ -412,8 +434,18 @@ $(document).ready(function(){
         
         $("#subsecTablasSeleccion").on("click",function(e){
             self.showElement($("#pantalla_tablas_seleccion"));
+            self.showElement($("#tablas_seleccion_container"));
             self.hideElement($("#pantalla_tablas_catalogo"));
+            self.hideElement($("#pantalla_tablas_descartadas"));
         });
+        
+        $("#subsecTablasDescartadas").on("click",function(e){
+            self.showElement($("#pantalla_tablas_descartadas"));
+            self.showElement($("#tablas_descartadas_container"));
+            self.hideElement($("#pantalla_tablas_catalogo"));
+            self.hideElement($("#pantalla_tablas_seleccion"));
+        });
+        
         
         $("#subsecTablasCatalogo").click();
         $("#subsecTablasCatalogo").addClass("active");
